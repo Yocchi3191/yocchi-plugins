@@ -78,11 +78,13 @@ git ls-files --full-name -- ':/' | grep -iE '^(\.github/|docs/)?pull_request_tem
 git ls-files --full-name -- ':/' | grep -iE '^\.github/pull_request_template/[^/]+\.md$'
 ```
 
-最初のコマンドの出力から、次の優先順で最初に当てはまる1つを使う:
+最初のコマンドの出力から、次の優先順で最初に当てはまる場所のものを使う:
 
 1. `.github/pull_request_template.md`
 2. `pull_request_template.md`
 3. `docs/pull_request_template.md`
+
+大文字小文字を無視した結果、同じ優先順位に複数ヒットした場合（例: `.github/pull_request_template.md` と `.github/PULL_REQUEST_TEMPLATE.md` が両方ある）は、下記の「複数」の場合と同様に、候補を示してユーザーに選んでもらう。
 
 2番目のコマンドの出力は、下記の`.github/PULL_REQUEST_TEMPLATE/`ディレクトリのテンプレート一覧である。
 
