@@ -71,11 +71,11 @@ git push -u origin <head-branch>
 
 ### 4-1: 使うテンプレートを決める
 
-リポジトリ側のPRテンプレートを優先する。次のコマンドで、gitが追跡しているテンプレート候補を大文字小文字を区別せずに列挙する（OSによる差が出ないよう、ファイルシステムではなくgitの一覧を使う）:
+リポジトリ側のPRテンプレートを優先する。リポジトリのルート（カレントディレクトリ）で次のコマンドを実行し、テンプレート候補を大文字小文字を区別せずに列挙する。存在しないディレクトリのエラーは捨てる:
 
 ```bash
-git ls-files --full-name -- ':/' | grep -iE '^(\.github/|docs/)?pull_request_template\.md$'
-git ls-files --full-name -- ':/' | grep -iE '^(\.github/|docs/)?pull_request_template/[^/]+\.md$'
+find . .github docs -maxdepth 1 -iname 'pull_request_template.md' 2>/dev/null
+find .github docs . -maxdepth 2 -ipath '*/pull_request_template/*.md' 2>/dev/null
 ```
 
 最初のコマンドの出力から、次の優先順で最初に当てはまる場所のものを使う:
@@ -88,7 +88,7 @@ git ls-files --full-name -- ':/' | grep -iE '^(\.github/|docs/)?pull_request_tem
 
 2番目のコマンドの出力は、下記の`PULL_REQUEST_TEMPLATE/`ディレクトリ（`.github/`・`docs/`・リポジトリ直下のいずれか）のテンプレート一覧である。
 
-grepは一致が無いと終了コード1を返すが、これは失敗ではない — 出力が無ければ「その場所にテンプレートは無い」として扱う。`git ls-files`自体が失敗した場合（リポジトリ外で実行した、など）は、フォールバックに進まず停止してユーザーに伝える。
+出力が無ければ「その場所にテンプレートは無い」として扱う。`docs/`が無いだけでも`find`の終了コードは1になるので、終了コードは見ず、出力だけで判断する。
 
 - **見つかった:** 4-2へ進む。
 - **どれも無いが、`PULL_REQUEST_TEMPLATE/`ディレクトリにテンプレートがある:**
