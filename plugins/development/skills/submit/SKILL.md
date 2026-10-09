@@ -71,11 +71,20 @@ git push -u origin <head-branch>
 
 ### 4-1: 使うテンプレートを決める
 
-リポジトリ側のPRテンプレートを優先する。リポジトリルート基準で次を順に探し（ファイル名の大文字小文字は区別しない）、最初に見つかったものを使う:
+リポジトリ側のPRテンプレートを優先する。次のコマンドで、gitが追跡しているテンプレート候補を大文字小文字を区別せずに列挙する（OSによる差が出ないよう、ファイルシステムではなくgitの一覧を使う）:
+
+```bash
+git ls-files -- ':/' | grep -iE '^(\.github/|docs/)?pull_request_template\.md$'
+git ls-files -- ':/' | grep -iE '^\.github/pull_request_template/[^/]+\.md$'
+```
+
+最初のコマンドの出力から、次の優先順で最初に当てはまる1つを使う:
 
 1. `.github/pull_request_template.md`
 2. `pull_request_template.md`
 3. `docs/pull_request_template.md`
+
+2番目のコマンドの出力は、下記の`.github/PULL_REQUEST_TEMPLATE/`ディレクトリのテンプレート一覧である。
 
 - **見つかった:** 4-2へ進む。
 - **どれも無いが、`.github/PULL_REQUEST_TEMPLATE/` ディレクトリにテンプレートがある:**
