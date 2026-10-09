@@ -74,8 +74,8 @@ git push -u origin <head-branch>
 リポジトリ側のPRテンプレートを優先する。次のコマンドで、gitが追跡しているテンプレート候補を大文字小文字を区別せずに列挙する（OSによる差が出ないよう、ファイルシステムではなくgitの一覧を使う）:
 
 ```bash
-git ls-files -- ':/' | grep -iE '^(\.github/|docs/)?pull_request_template\.md$'
-git ls-files -- ':/' | grep -iE '^\.github/pull_request_template/[^/]+\.md$'
+git ls-files --full-name -- ':/' | grep -iE '^(\.github/|docs/)?pull_request_template\.md$'
+git ls-files --full-name -- ':/' | grep -iE '^\.github/pull_request_template/[^/]+\.md$'
 ```
 
 最初のコマンドの出力から、次の優先順で最初に当てはまる1つを使う:
