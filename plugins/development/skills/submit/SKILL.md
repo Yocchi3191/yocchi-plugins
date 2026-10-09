@@ -75,7 +75,7 @@ git push -u origin <head-branch>
 
 ```bash
 git ls-files --full-name -- ':/' | grep -iE '^(\.github/|docs/)?pull_request_template\.md$'
-git ls-files --full-name -- ':/' | grep -iE '^\.github/pull_request_template/[^/]+\.md$'
+git ls-files --full-name -- ':/' | grep -iE '^(\.github/|docs/)?pull_request_template/[^/]+\.md$'
 ```
 
 最初のコマンドの出力から、次の優先順で最初に当てはまる場所のものを使う:
@@ -86,15 +86,15 @@ git ls-files --full-name -- ':/' | grep -iE '^\.github/pull_request_template/[^/
 
 大文字小文字を無視した結果、同じ優先順位に複数ヒットした場合（例: `.github/pull_request_template.md` と `.github/PULL_REQUEST_TEMPLATE.md` が両方ある）は、下記の「複数」の場合と同様に、候補を示してユーザーに選んでもらう。
 
-2番目のコマンドの出力は、下記の`.github/PULL_REQUEST_TEMPLATE/`ディレクトリのテンプレート一覧である。
+2番目のコマンドの出力は、下記の`PULL_REQUEST_TEMPLATE/`ディレクトリ（`.github/`・`docs/`・リポジトリ直下のいずれか）のテンプレート一覧である。
 
 grepは一致が無いと終了コード1を返すが、これは失敗ではない — 出力が無ければ「その場所にテンプレートは無い」として扱う。`git ls-files`自体が失敗した場合（リポジトリ外で実行した、など）は、フォールバックに進まず停止してユーザーに伝える。
 
 - **見つかった:** 4-2へ進む。
-- **どれも無いが、`.github/PULL_REQUEST_TEMPLATE/` ディレクトリにテンプレートがある:**
+- **どれも無いが、`PULL_REQUEST_TEMPLATE/`ディレクトリにテンプレートがある:**
   - 1つだけ: それを使って4-2へ進む。
   - 複数: 自動で選ばず、候補のファイル名を示してユーザーにどれを使うか選んでもらい、選ばれたものを使って4-2へ進む。選んでもらうまではここで停止し、Step 5・6へ進まない。候補に無いものが選ばれたら、候補を示してもう一度選んでもらう。
-- **どれも無く、`.github/PULL_REQUEST_TEMPLATE/` も空または無い:** このskill自身のディレクトリ（この`SKILL.md`と同じ場所）にある`pr-template.md`をフォールバックとして使う。4-3へ進む。
+- **どれも無く、`PULL_REQUEST_TEMPLATE/`ディレクトリも空または無い:** このskill自身のディレクトリ（この`SKILL.md`と同じ場所）にある`pr-template.md`をフォールバックとして使う。4-3へ進む。
 
 ### 4-2: リポジトリ側テンプレートを埋める
 
