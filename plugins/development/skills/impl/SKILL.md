@@ -1,13 +1,13 @@
 ---
 name: impl
-description: issueのREQを1つずつテストにして実装したいときに使う — 例:「issue#<番号>をやって」「実装して」「TDDで進めて」。refine-issueで固めたissueとdesignのADRメモを元に、人間が選んだテストごとに「失敗を確認する → 通す → 整える」を回し、submitが拾える形（テスト名・作業メモ）を残す。言語・フレームワークには依存しない。designの後、submitの前に動く。
+description: issueのREQを1つずつテストにして実装したいときに使う — 例:「issue#<番号>をやって」「実装して」「TDDで進めて」。refine-issueで固めたissueを元に、人間が選んだテストごとに「失敗を確認する → 通す → 整える」を回し、submitが拾える形（テスト名・作業メモ）を残す。言語・フレームワークには依存しない。designの後、submitの前に動く。
 ---
 
 # Impl
 
 issueのREQを、1つずつテストにして実装する。着手するテストは人間が選ぶ。コードベースの理解を人間の手元に残すため。
 
-## Step 1: issueとADRメモを読む
+## Step 1: issueを読む
 
 issue番号が渡されていなければ、ユーザーに聞く。issue本文を取得する。
 
@@ -17,7 +17,7 @@ gh issue view <番号> --json title,body
 
 取得に失敗した場合は、番号の確認をユーザーに頼んで停止する。
 
-次に、`design`が残したADRメモ（`<ドキュメント置き場>/adr/<head-branch>.md`）を探す。リポジトリルート（`git rev-parse --show-toplevel`）の`docs/adr/<head-branch>.md`、`doc/adr/<head-branch>.md`の順に確認し、最初に見つかったものを読む。`<head-branch>`は`git branch --show-current`で取る。どちらも無ければ、ADRメモ無しとして先へ進む。エラーではない。
+`design`が残したADRメモは読まない。設計は実装の中で決まっていくものなので、実装前の判断材料にはしない。ADRメモはPR本文を書くときに`submit`が読む。
 
 ## Step 2: issueが実装に渡せる状態か確認する
 
