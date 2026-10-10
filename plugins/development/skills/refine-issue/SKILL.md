@@ -33,6 +33,7 @@ gh issue view <番号> --json title,body,labels
 
 - `enhancement` → 新機能。このSKILL.mdと同じディレクトリの`issue-feature.md`を使う
 - `bug` → バグ。このSKILL.mdと同じディレクトリの`issue-bug.md`を使う
+- 両方付いている → どちらで進めるかをユーザーに確認する
 - どちらもない → 本文から種別を推測してユーザーに確認し、承認を得てからラベルを付ける。リファクタなど挙動を変えない作業だと分かったら、issueは不要であることを伝えて終了する
 
 使うラベル（`enhancement` / `bug`）がリポジトリに無いときは、次を確認する。
