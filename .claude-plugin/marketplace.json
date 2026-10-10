@@ -18,7 +18,7 @@
     {
       "name": "development",
       "description": "日々の開発作業（PR作成・レビュー・テスト基盤など）を支えるskill集。",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "source": "./plugins/development",
       "author": {
         "name": "Yocchi3191"
