@@ -26,7 +26,7 @@ gh pr list --head "$(git branch --show-current)" --state all --json number,title
 
 読み取り専用で、次を集める。取得できないものは「分からない」として扱い、推測で埋めない。
 
-- **git:** 未コミットの変更（`git status --short`）、デフォルトブランチからの差（`git log --oneline <base>..HEAD`）、リモートとの差
+- **git:** 未コミットの変更（`git status --short`）、デフォルトブランチからの差（`gh repo view --json defaultBranchRef -q .defaultBranchRef.name` で得た名前を`<default>`として、`git log --oneline origin/<default>..HEAD`）、リモートとの差
 - **issue:** `gh issue view <番号> --json title,body` で `REQ-<n>:` の一覧を取る
 - **テスト:** テストのコードを `issue_<番号>_REQ_<n>_` で検索し、REQごとの有無を調べる。テストを実行はしない
 - **PR:** あれば、Draftかどうか、未対応のレビュー指摘（`fix-review` と同じく、解決済みでないスレッドと、非表示でないコメント）、CIの状態
