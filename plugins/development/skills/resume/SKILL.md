@@ -29,7 +29,7 @@ gh pr list --head "$(git branch --show-current)" --state all --json number,title
 - **git:** 未コミットの変更（`git status --short`）、デフォルトブランチからの差（`gh repo view --json defaultBranchRef -q .defaultBranchRef.name` で得た名前を`<default>`として、`git log --oneline origin/<default>..HEAD`）、リモートとの差
 - **issue:** `gh issue view <番号> --json title,body` で `REQ-<n>:` の一覧を取る
 - **テスト:** テストのコードを `issue_<番号>_REQ_<n>_` で検索し、REQごとの有無を調べる。テストを実行はしない
-- **PR:** あれば、Draftかどうか、未対応のレビュー指摘（`fix-review` と同じく、解決済みでないスレッドと、非表示でないコメント）、CIの状態
+- **PR:** あれば、Draftかどうか、未対応のレビュー指摘（`fix-review` と同じく、解決済みでないスレッドと、非表示でないコメント）、CIの状態、本文の `## 動作確認` のチェック状態
 - **ADRメモ:** `design` が残したもの（`<ドキュメント置き場>/adr/<ブランチ名>.md`）
 - **行動ログ:** `impl` が作業メモに追記した、`<ブランチ名> <種別>: <本文>` 形式の行。置き場はプロジェクトのCLAUDE.mdに書いてあればそれを使い、無い、またはファイルが無ければ、聞かずにログ無しとして扱い、Step 4でそう伝える。読むのはコンテキストを膨らませないため、次の分だけにする:
   - 現在のブランチ名の行のうち、末尾20行
@@ -49,7 +49,7 @@ gh pr list --head "$(git branch --show-current)" --state all --json number,title
 - 未コミットの差分があるのに、最後のコミットから時間が経っている
 - ADRメモが残っているのに、PRがすでにある（`submit` が展開し忘れた可能性）
 - PRがDraftのまま、未対応の指摘がある、またはCIが赤い
-- REQに `[人間確認]` の印があり、確認した記録が見当たらない
+- PR本文の `## 動作確認` に、チェックの付いていない `- [ ] REQ-<n>`（`[人間確認]` のREQ）が残っている
 - 最後の `next:` が指す作業（テスト、REQなど）が、すでに済んでいる、またはコードに見当たらない
 - 最後の `next:` と、実際のコミット・差分でやっていることが大きく違う
 - ログの `decision:` と、実際のコード・ADRメモが食い違っている
