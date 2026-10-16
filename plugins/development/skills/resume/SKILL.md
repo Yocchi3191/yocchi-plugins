@@ -15,9 +15,13 @@ description: 作業を始める・再開するときに、いま何が途中で�
 
 ```bash
 git branch --show-current
+gh repo view --json defaultBranchRef -q .defaultBranchRef.name
 gh pr list --head "$(git branch --show-current)" --state all --json number,title,isDraft,state
 ```
 
+2行目の出力を、以降`<default>`として使う。
+
+- ブランチ名が空（detached HEAD）なら、名前付きブランチが要ると伝えて停止する
 - ブランチ名・PR本文・直近のコミットメッセージにissue番号があれば、それを使う
 - 見つからなければ、ユーザーにissue番号を聞く。「無い」と答えられたら、issueなしで進める（Step 3のREQ照合は省く）
 - デフォルトブランチ上にいて作業ブランチが無ければ、「着手中の作業は見当たらない」と伝え、未着手のissueを `gh issue list` で数件示して停止する
@@ -26,7 +30,7 @@ gh pr list --head "$(git branch --show-current)" --state all --json number,title
 
 読み取り専用で、次を集める。取得できないものは「分からない」として扱い、推測で埋めない。
 
-- **git:** 先に `git fetch` でリモートの参照を最新にする（作業ツリーには触れないので、このskillで許す唯一の書き込みとする）。その上で、未コミットの変更（`git status --short`）、デフォルトブランチからの差（`gh repo view --json defaultBranchRef -q .defaultBranchRef.name` で得た名前を`<default>`として、`git log --oneline origin/<default>..HEAD`）、リモートとの差
+- **git:** 先に `git fetch` でリモートの参照を最新にする（作業ツリーには触れないので、このskillで許す唯一の書き込みとする）。その上で、未コミットの変更（`git status --short`）、デフォルトブランチからの差（`git log --oneline origin/<default>..HEAD`）、リモートとの差
 - **issue:** `gh issue view <番号> --json title,body` で `REQ-<n>:` の一覧を取る
 - **テスト:** テストのコードを `issue_<番号>_REQ_<n>_` で検索し、REQごとの有無を調べる。テストを実行はしない
 - **PR:** あれば、Draftかどうか、未対応のレビュー指摘（`fix-review` の Step 2 と同じ基準で判定する。条件はここに書き写さない）、CIの状態、本文の `## 動作確認` のチェック状態
