@@ -29,7 +29,7 @@ gh pr list --head "$(git branch --show-current)" --state all --json number,title
 - **git:** 未コミットの変更（`git status --short`）、デフォルトブランチからの差（`gh repo view --json defaultBranchRef -q .defaultBranchRef.name` で得た名前を`<default>`として、`git log --oneline origin/<default>..HEAD`）、リモートとの差
 - **issue:** `gh issue view <番号> --json title,body` で `REQ-<n>:` の一覧を取る
 - **テスト:** テストのコードを `issue_<番号>_REQ_<n>_` で検索し、REQごとの有無を調べる。テストを実行はしない
-- **PR:** あれば、Draftかどうか、未対応のレビュー指摘（`fix-review` と同じく、解決済みでないスレッドと、非表示でないコメント）、CIの状態、本文の `## 動作確認` のチェック状態
+- **PR:** あれば、Draftかどうか、未対応のレビュー指摘（`fix-review` の Step 2 と同じ基準で判定する。条件はここに書き写さない）、CIの状態、本文の `## 動作確認` のチェック状態
 - **ADRメモ:** `design` が残したもの（`<ドキュメント置き場>/adr/<ブランチ名>.md`）
 - **行動ログ:** `impl` が作業メモに追記した、`<ブランチ名> <種別>: <本文>` 形式の行。置き場はプロジェクトのCLAUDE.mdに書いてあればそれを使い、無い、またはファイルが無ければ、聞かずにログ無しとして扱い、Step 4でそう伝える。読むのはコンテキストを膨らませないため、次の分だけにする:
   - 現在のブランチ名の行のうち、末尾20行
