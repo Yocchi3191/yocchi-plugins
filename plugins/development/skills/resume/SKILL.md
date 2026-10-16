@@ -30,7 +30,7 @@ gh pr list --head "$(git branch --show-current)" --state all --json number,title
 
 読み取り専用で、次を集める。取得できないものは「分からない」として扱い、推測で埋めない。
 
-- **git:** 先に `git fetch` でリモートの参照を最新にする（作業ツリーには触れないので、このskillで許す唯一の書き込みとする）。その上で、未コミットの変更（`git status --short`）、デフォルトブランチからの差（`git log --oneline origin/<default>..HEAD`）、リモートとの差
+- **git:** 先に `git fetch` でリモートの参照を最新にする（作業ツリーには触れないので、このskillで許す唯一の書き込みとする）。その上で、未コミットの変更（`git status --short`）、デフォルトブランチからの差（`git log --oneline origin/<default>..HEAD`）、リモートとの差（`git rev-list --left-right --count '@{u}...HEAD'`。upstreamが無くて失敗したら、未pushとして扱う）
 - **issue:** `gh issue view <番号> --json title,body` で `REQ-<n>:` の一覧を取る
 - **テスト:** テストのコードを `issue_<番号>_REQ_<n>_` で検索し、REQごとの有無を調べる。テストを実行はしない
 - **PR:** あれば、Draftかどうか、未対応のレビュー指摘（`fix-review` の Step 2 と同じ基準で判定する。条件はここに書き写さない）、CIの状態、本文の `## 動作確認` のチェック状態
