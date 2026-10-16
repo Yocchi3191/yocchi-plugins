@@ -7,7 +7,7 @@ description: 作業を始める・再開するときに、いま何が途中で�
 
 作業の現在地を、要約ではなく「食い違い」で示す。要約は書いた時点で古くなり、AIが書くともっともらしく外れるため。確認できた事実と、事実同士のずれだけを根拠付きで出す。
 
-このskillは何も書き込まない。進捗ファイルも作らない — 保存した進捗の要約は必ず古くなる。情報源は、git・issue・PR・既存のメモ（`impl`が追記する行動ログを含む）だけである。行動ログは追記専用の事実の記録であり、要約ではない。ただし書き手の主張なので、必ずgitとテストで検証する。
+このskillは何も書き込まない（例外は、Step 2でリモートの参照を最新にする `git fetch` だけ）。進捗ファイルも作らない — 保存した進捗の要約は必ず古くなる。情報源は、git・issue・PR・既存のメモ（`impl`が追記する行動ログを含む）だけである。行動ログは追記専用の事実の記録であり、要約ではない。ただし書き手の主張なので、必ずgitとテストで検証する。
 
 ## Step 1: 作業の単位を決める
 
@@ -26,7 +26,7 @@ gh pr list --head "$(git branch --show-current)" --state all --json number,title
 
 読み取り専用で、次を集める。取得できないものは「分からない」として扱い、推測で埋めない。
 
-- **git:** 未コミットの変更（`git status --short`）、デフォルトブランチからの差（`gh repo view --json defaultBranchRef -q .defaultBranchRef.name` で得た名前を`<default>`として、`git log --oneline origin/<default>..HEAD`）、リモートとの差
+- **git:** 先に `git fetch` でリモートの参照を最新にする（作業ツリーには触れないので、このskillで許す唯一の書き込みとする）。その上で、未コミットの変更（`git status --short`）、デフォルトブランチからの差（`gh repo view --json defaultBranchRef -q .defaultBranchRef.name` で得た名前を`<default>`として、`git log --oneline origin/<default>..HEAD`）、リモートとの差
 - **issue:** `gh issue view <番号> --json title,body` で `REQ-<n>:` の一覧を取る
 - **テスト:** テストのコードを `issue_<番号>_REQ_<n>_` で検索し、REQごとの有無を調べる。テストを実行はしない
 - **PR:** あれば、Draftかどうか、未対応のレビュー指摘（`fix-review` の Step 2 と同じ基準で判定する。条件はここに書き写さない）、CIの状態、本文の `## 動作確認` のチェック状態
