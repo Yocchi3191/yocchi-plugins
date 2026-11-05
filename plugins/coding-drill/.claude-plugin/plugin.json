@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "coding-drill",
+  "version": "0.1.0",
+  "description": "週1回の実装課題の練習を採点し、強い点・弱い点をFBドキュメントに残す。",
+  "author": {
+    "name": "donchan3191"
+  }
+}
