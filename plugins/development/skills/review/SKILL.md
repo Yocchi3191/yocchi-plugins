@@ -79,7 +79,7 @@ git status --porcelain --untracked-files=no
 set -e
 out="$(git rev-parse --absolute-git-dir)/development-review"
 mkdir -p "$out"
-git diff -M <BASE_SHA>..<HEAD_SHA> > "$out/diff.patch"
+git diff --no-color --no-ext-diff -M <BASE_SHA>..<HEAD_SHA> > "$out/diff.patch"
 git log <BASE_SHA>..<HEAD_SHA> > "$out/log.txt"
 test -s "$out/diff.patch"
 echo "$out"
@@ -97,13 +97,14 @@ echo "$out"
 バイト数も見るのは、Markdownのように1行が1段落になる差分だと、行数が少なくても読む量が多いため。全角文字はUTF-8で3バイトになり、表示幅（2桁）より1.5倍多く数えられる。日本語の多い差分には少し厳しめに働くが、意図した側に倒している。
 
 ```bash
-git diff -M <BASE_SHA>..<HEAD_SHA> -- . ':(exclude,attr:linguist-generated)' ':(exclude,attr:linguist-generated=true)' \
+git diff --no-color --no-ext-diff -M <BASE_SHA>..<HEAD_SHA> -- . ':(exclude,attr:linguist-generated)' ':(exclude,attr:linguist-generated=true)' \
   | LC_ALL=C awk '/^diff --git /{h=0} /^@@/{h=1; next} h && /^[-+]/{n++; b+=length($0)-1} END{printf "lines=%d bytes=%d\n", n, b}'
 ```
 
 - 自動生成ファイル（lockfile、Unityの`.meta`など、人が直接編集しないファイル）は数えない。どれが自動生成かは、リポジトリの`.gitattributes`で`linguist-generated`が指定されているかで決める。GitHubがPRの差分で最初から折りたたむのと同じ指定である。このskillは独自の除外リストを持たない — 数えたくないファイルがあれば、リポジトリの`.gitattributes`に書いてもらう。
 - `.gitattributes`はチェックアウト中のものが読まれる。Step 4でチェックアウト中のコミットが`HEAD_SHA`と一致することは確認済みである。
 - リネームしただけのファイルは`-M`で差分が0行になるので、数に入らない。削除したファイルは数に入る。
+- `--no-color`・`--no-ext-diff`は省かない。ユーザーの設定で色付けや外部のdiffツールが有効だと、`@@`の行を見分けられず、エラーにならないまま0行・0バイトと数えてしまうため。
 
 結果（行数・バイト数・上限超過かどうか）を控えておく。上限を超えていてもここでは停止せず、Step 7に進む — 中身のレビューは常に行い、大きさの判定はStep 8で結果に添えるだけにする。分割を見送るとユーザーが判断した場合でも、中身のレビューを受けずに進むことが無いようにするため。
 
