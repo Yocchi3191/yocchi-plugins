@@ -1,6 +1,6 @@
 ---
 name: review-pr
-description: ユーザーが特定のPRのレビューを求めている場合に使う — 例:「PR #40をレビューして」「review-pr 40」。PR自体からBASE_SHA/HEAD_SHA/PLAN_OR_REQUIREMENTS/DESCRIPTIONを解決し、実際のレビューは`development:review`に委譲する。レビュー結果はPR状態を変更する前に`gh pr comment`でPRへ投稿する。指摘が無ければ`gh pr ready`でPRをready for reviewに変換し、指摘があればDraftのまま`development:fix-review`に対応を引き継ぐ。submitやfix-reviewからも続けて呼ばれる。指摘があるとfix-reviewが修正とpushまで行うので、直さずにレビューだけが欲しい場合は`development:review`を使う。
+description: ユーザーが特定のPRのレビューを求めている場合に使う — 例:「PR #40をレビューして」「review-pr 40」。PR自体からBASE_SHA/HEAD_SHA/PLAN_OR_REQUIREMENTS/DESCRIPTIONを解決し、実際のレビューは`development:review`に委譲する。差分の大きさが上限（400行・32,000バイト）を超えていれば、PRの分割をImportantの指摘として足す。レビュー結果はPR状態を変更する前に`gh pr comment`でPRへ投稿する。指摘が無ければ`gh pr ready`でPRをready for reviewに変換し、指摘があればDraftのまま`development:fix-review`に対応を引き継ぐ。submitやfix-reviewからも続けて呼ばれる。指摘があるとfix-reviewが修正とpushまで行うので、直さずにレビューだけが欲しい場合は`development:review`を使う。
 ---
 
 # Review PR
@@ -71,11 +71,23 @@ PRが何を行うかの簡潔な要約。タイトルと本文（Step 2）から
 
 `review`がレビュー結果を返さずに止まった場合（チェックアウト中のコミットがPRのheadと違う、など）は、`review`が伝えた理由をそのままユーザーに報告して停止する。PRへのコメント投稿も状態の変更もしない。
 
-レビュー結果が返ってきたら、PR状態を変更する前にその結果をPRへ投稿する:
+レビュー結果が返ってきたら、`review`が添えた差分の大きさを見る。上限を超えていた場合は、レビュー役の指摘とは別に、次の指摘をIssuesに1件足す。重さはImportantで固定する — `fix-review`はCritical・Importantを直したときだけ再レビューを頼むので、分割した後に、上限内に収まったかをこのskillで測り直させるため:
+
+```
+**Important** PRを分割する
+- 場所: PR全体
+- 何が問題か: 見るべき差分が上限を超えている（<行数>行・<バイト数>バイト。上限は400行・32,000バイト。`.gitattributes`で`linguist-generated`が指定されたファイルは数えていない）
+- なぜ問題か: レビューが1時間以内に終わると不具合を見つけやすく、1時間に収まるのは200〜400行程度のPRだと言われている（https://zenn.dev/isana/articles/ideal-size-of-pull-request-and-why）
+- 修正案: 単体で動く単位か、レビューしやすい単位でPRを分ける。全体を同時にマージしないと動かない場合は、stacked PRに分けてまとめてマージする。どこで分けるかに設計判断が要る場合や、上限を少し超える程度で分けると動かなくなる場合は、分けるか見送るかをユーザーが判断する
+```
+
+指摘を足したら、Assessmentもそれに合わせて「マージ可能ではない」側にする。
+
+そのうえで、PR状態を変更する前にその結果をPRへ投稿する:
 
 ```bash
 gh pr comment <N> --body "$(cat <<'EOF'
-<reviewが報告したレビュー結果: Strengths/Issues/Assessment>
+<reviewが報告したレビュー結果: Strengths/Issues/Assessment（上限を超えていれば、上の指摘を足したもの）と、差分の大きさの1行>
 EOF
 )"
 ```
