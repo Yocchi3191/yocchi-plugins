@@ -97,7 +97,7 @@ echo "$out"
 バイト数も見るのは、Markdownのように1行が1段落になる差分だと、行数が少なくても読む量が多いため。全角文字はUTF-8で3バイトになり、表示幅（2桁）より1.5倍多く数えられる。日本語の多い差分には少し厳しめに働くが、意図した側に倒している。
 
 ```bash
-git diff --no-color --no-ext-diff -M <BASE_SHA>..<HEAD_SHA> -- . ':(exclude,attr:linguist-generated)' ':(exclude,attr:linguist-generated=true)' \
+git diff --no-color --no-ext-diff -M <BASE_SHA>..<HEAD_SHA> -- ':/' ':(top,exclude,attr:linguist-generated)' ':(top,exclude,attr:linguist-generated=true)' \
   | LC_ALL=C awk '/^diff --git /{h=0} /^@@/{h=1; next} h && /^[-+]/{n++; b+=length($0)-1} END{printf "lines=%d bytes=%d\n", n, b}'
 ```
 
@@ -105,6 +105,7 @@ git diff --no-color --no-ext-diff -M <BASE_SHA>..<HEAD_SHA> -- . ':(exclude,attr
 - `.gitattributes`はチェックアウト中のものが読まれる。Step 4でチェックアウト中のコミットが`HEAD_SHA`と一致することは確認済みである。
 - リネームしただけのファイルは`-M`で差分が0行になるので、数に入らない。削除したファイルは数に入る。
 - `--no-color`・`--no-ext-diff`は省かない。ユーザーの設定で色付けや外部のdiffツールが有効だと、`@@`の行を見分けられず、エラーにならないまま0行・0バイトと数えてしまうため。
+- pathspecはリポジトリのルート基準（`:/`・`top`）で書く。サブディレクトリで実行しても、Step 5で書き出した差分と同じく、リポジトリ全体を数えるため。
 
 結果（行数・バイト数・上限超過かどうか）を控えておく。上限を超えていてもここでは停止せず、Step 7に進む — 中身のレビューは常に行い、大きさの判定はStep 8で結果に添えるだけにする。分割を見送るとユーザーが判断した場合でも、中身のレビューを受けずに進むことが無いようにするため。
 
