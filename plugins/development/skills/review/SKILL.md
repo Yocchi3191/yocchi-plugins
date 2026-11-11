@@ -99,8 +99,10 @@ echo "$out"
 測るのは、このskillのディレクトリの2つ上（プラグインのルート）にある`scripts/diff-size.sh`である。測り方と上限の値は、このスクリプトだけに書いてある — `split-pr`も同じスクリプトで測るので、ここにコマンドを書き写さない:
 
 ```bash
-bash <プラグインのルート>/scripts/diff-size.sh <BASE_SHA> <HEAD_SHA>
+bash "<プラグインのルート>/scripts/diff-size.sh" <BASE_SHA> <HEAD_SHA>
 ```
+
+パスは引用符で囲む。プラグインのパスには、空白やバックスラッシュが入ることがあるため。
 
 出力は`lines=<行数> bytes=<バイト数> over=<yes|no>`の1行で、`over=yes`が上限超過である。スクリプトが失敗した場合は、大きさを測れなかったことをStep 8で添え、中身のレビューは続ける。
 
