@@ -1,6 +1,6 @@
 ---
 name: review-pr
-description: ユーザーが特定のPRのレビューを求めている場合に使う — 例:「PR #40をレビューして」「review-pr 40」。PR自体からBASE_SHA/HEAD_SHA/PLAN_OR_REQUIREMENTS/DESCRIPTIONを解決し、実際のレビューは`development:review`に委譲する。差分の大きさが上限（400行・32,000バイト）を超えていれば、PRの分割をImportantの指摘として足す。レビュー結果はPR状態を変更する前に`gh pr comment`でPRへ投稿する。指摘が無ければ`gh pr ready`でPRをready for reviewに変換し、指摘があればDraftのまま`development:fix-review`に対応を引き継ぐ。submitやfix-reviewからも続けて呼ばれる。指摘があるとfix-reviewが修正とpushまで行うので、直さずにレビューだけが欲しい場合は`development:review`を使う。
+description: ユーザーが特定のPRのレビューを求めている場合に使う — 例:「PR #40をレビューして」「review-pr 40」。PR自体からBASE_SHA/HEAD_SHA/PLAN_OR_REQUIREMENTS/DESCRIPTIONを解決し、実際のレビューは`development:review`に委譲する。差分の大きさがレビュー規約（review-rules.md）の上限を超えていれば、PRの分割をImportantの指摘として足す。レビュー結果はPR状態を変更する前に`gh pr comment`でPRへ投稿する。指摘が無ければ`gh pr ready`でPRをready for reviewに変換し、指摘があればDraftのまま`development:fix-review`に対応を引き継ぐ。submitやfix-reviewからも続けて呼ばれる。指摘があるとfix-reviewが修正とpushまで行うので、直さずにレビューだけが欲しい場合は`development:review`を使う。
 ---
 
 # Review PR
@@ -71,13 +71,13 @@ PRが何を行うかの簡潔な要約。タイトルと本文（Step 2）から
 
 `review`がレビュー結果を返さずに止まった場合（チェックアウト中のコミットがPRのheadと違う、など）は、`review`が伝えた理由をそのままユーザーに報告して停止する。PRへのコメント投稿も状態の変更もしない。
 
-レビュー結果が返ってきたら、`review`が添えた差分の大きさを見る。上限を超えていた場合は、レビュー役の指摘とは別に、次の指摘をIssuesに1件足す。重さはImportantで固定する — `fix-review`はCritical・Importantを直したときだけ再レビューを頼むので、分割した後に、上限内に収まったかをこのskillで測り直させるため:
+レビュー結果が返ってきたら、`review`が添えた差分の大きさを見る。上限を超えていた場合は、レビュー役の指摘とは別に、次の指摘をIssuesに1件足す。`<規約の…>`の部分は、プラグインのルート（このskillのディレクトリの2つ上）にある`review-rules.md`の「PRの大きさの上限」から埋める。重さはImportantで固定する — `fix-review`はCritical・Importantを直したときだけ再レビューを頼むので、分割した後に、上限内に収まったかをこのskillで測り直させるため:
 
 ```
 **Important** PRを分割する
 - 場所: PR全体
-- 何が問題か: 見るべき差分が上限を超えている（<行数>行・<バイト数>バイト。上限は400行・32,000バイト。`.gitattributes`で`linguist-generated`が指定されたファイルは数えていない）
-- なぜ問題か: 1時間を超えるレビューは品質が下がり、約200行のPRなら90%が1時間以内にレビューを終えられる。また、400行を超える変更を一度にレビューすると、欠陥を見つける力が下がるという調査（Cisco）がある。これらから、理想的なPRの大きさは200〜400行とされている（https://zenn.dev/isana/articles/ideal-size-of-pull-request-and-why）
+- 何が問題か: 見るべき差分が上限を超えている（<行数>行・<バイト数>バイト。上限は<規約の行数>行・<規約のバイト数>バイト。`.gitattributes`で`linguist-generated`が指定されたファイルは数えていない）
+- なぜ問題か: <規約の「根拠」を1〜2文に要約したもの。出典のURLを添える>
 - 修正案: 単体で動く単位か、レビューしやすい単位でPRを分ける。全体を同時にマージしないと動かない場合は、stacked PRに分けてまとめてマージする。どこで分けるかに設計判断が要る場合や、上限を少し超える程度で分けると動かなくなる場合は、分けるか見送るかをユーザーが判断する
 ```
 
@@ -97,6 +97,8 @@ EOF
 このコマンドが失敗した場合（権限不足、PRが裏で閉じられた、一時的なAPIエラー等）は、投稿できたかのように`gh pr ready`や`fix-review`の呼び出しへ進まず、処理を止めてユーザーに報告する。
 
 まずこのコメントを投稿し、その後で結果に応じて動く — こうすることで、実際にPR状態を変える`gh pr ready`（下記）とは別に、PRには常にレビュー内容の記録が残る:
+
+- **差分の大きさを測れなかった場合:** `review`はリトライしたうえで「差分の大きさを測れなかった」を添えて返す。このときは、コメントに大きさの1行の代わりにその旨を載せて投稿し、指摘の有無にかかわらず、`gh pr ready`も`fix-review`の呼び出しもせずに停止する。測れなかったことと、その理由をユーザーに伝える — 上限を超えているか分からないまま、PRをreadyにしないため。
 
 - **指摘が一件も無い場合:** コメント投稿後、対象PRをready for reviewに切り替える:
 
