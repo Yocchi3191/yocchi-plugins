@@ -80,11 +80,26 @@ git merge-base --is-ancestor origin/<baseRefName> HEAD
 
 ```bash
 gh stack checkout <N>
+（stackの各ブランチをoriginに揃える）
 gh stack rebase --downstack --no-trunk
 gh stack push
 ```
 
-rebaseがコンフリクトした、または別のworktreeの変更などで止まった場合は、`gh stack rebase --abort`で元に戻して停止し、ユーザーに伝える。`gh stack checkout`が手元とGitHubのstackの食い違いの解決を求めた場合も、そこで停止する。pushが失敗した、または止められた場合も停止し、手元はrebase済みでoriginは元のままであることと、`git reset --hard <headRefOid>`で手元を戻せることを伝える。rebaseした場合は、Step 6の対応報告にその旨を書く。
+**stackの各ブランチをoriginに揃える:** `--no-trunk`は、fetchも手元のブランチの更新もしない。手元のブランチが古いまま`gh stack push`すると、originにある新しいコミットを巻き戻してしまう。そこで、rebaseの前に、stackのブランチを1つずつoriginと比べる。対象は、`gh stack view --json`の`branches`のうち、`isMerged`が`false`で、今いるブランチ以外のもの（今いるブランチは、PRのheadと一致することを確かめ済み）:
+
+```bash
+git fetch origin
+gh stack view --json
+git rev-parse <ブランチ> origin/<ブランチ>
+git merge-base --is-ancestor <ブランチ> origin/<ブランチ>
+git fetch origin <ブランチ>:<ブランチ>
+```
+
+- 手元とoriginが同じコミットなら、何もしない。
+- 手元がoriginの祖先なら（4つ目のコマンドが成功する）、手元が遅れているだけなので、5つ目のコマンドでfast-forwardする。
+- それ以外（手元が進んでいる、分岐している、fast-forwardに失敗した）は、手元とoriginのどちらが正しいかを決められないので、停止してユーザーに伝える。
+
+rebaseがコンフリクトした、または別のworktreeの変更などで止まった場合は、`gh stack rebase --abort`で元に戻して停止し、ユーザーに伝える。`gh stack checkout`が失敗した、または入力を求めた場合も、そこで停止する。pushが失敗した、または止められた場合も停止し、手元はrebase済みでoriginは元のままであることと、`git reset --hard <headRefOid>`で手元を戻せることを伝える。rebaseした場合は、Step 6の対応報告にその旨を書く。rebaseした後も、指摘の行番号はrebase前のhead（`headRefOid`）のファイルを指すので、下の仕分けでは、そのコミットのファイルで該当する行を確かめる。
 
 指摘をそのまま信じない。該当するコードを読んで、指摘が正しいかを確かめてから、次のいずれかに分ける:
 
@@ -137,7 +152,7 @@ rebaseがコンフリクトした、または別のworktreeの変更などで止
 
 移った先の候補は、このPRの上に積んだPRである。「分割する」なら`split-pr`が返した新しいPR、「分割済み」なら`gh pr list --base <headRefName> --state open`で見つかるPRと、さらにその上に積んだPRを使う。
 
-Step 3で仕分けた指摘を、区分を問わず1件ずつ見直す。移ったかどうかは、ファイル単位ではなく、指摘された行の変更が、このPRの差分に含まれるかで判定する — 同じファイルが複数のPRで変更されていることがあるため。指摘の行番号は、分割する前のhead（Step 3で確かめた`headRefOid`）のファイルを指すので、そのコミットのファイルで該当する行を確かめる。このPRの差分は、分岐点から求める:
+Step 3で仕分けた指摘を、区分を問わず1件ずつ見直す。移ったかどうかは、ファイル単位ではなく、指摘された行の変更が、このPRの差分に含まれるかで判定する — 同じファイルが複数のPRで変更されていることがあるため。「分割する」なら、指摘の行番号は分割する前のhead（Step 3で確かめた`headRefOid`）のファイルを指すので、そのコミットのファイルで該当する行を確かめる。「分割済み」なら、行番号がどのコミットのファイルを指すかが分からないので、指摘の内容とファイル名から該当する行を推測する。推測できなければ、このPRに残っているものとして扱う。このPRの差分は、分岐点から求める:
 
 ```bash
 gh pr view <N> --json baseRefName
@@ -223,11 +238,12 @@ gh pr comment <N> --body-file <一時ファイル>
 ```bash
 git fetch origin
 gh stack checkout <N>
+（stackの各ブランチをoriginに揃える）
 gh stack rebase --upstack --no-trunk
 gh stack push
 ```
 
-rebaseがコンフリクトした、または別のworktreeの変更などで止まった場合は、`gh stack rebase --abort`で元に戻す。`gh stack checkout`が食い違いの解決を求めた場合も、そこでやめる。pushが失敗した場合も含め、上のPRのrebaseが済んでいないことをユーザーに伝え、rebaseは人に任せる。この後の再レビューやreadyへの切り替えは、そのまま進める。
+checkoutの後、rebaseの前に、Step 3の「stackの各ブランチをoriginに揃える」と同じ手順で、上のPRのブランチをoriginに揃える。揃えられなかったら、そこでやめる。rebaseがコンフリクトした、または別のworktreeの変更などで止まった場合は、`gh stack rebase --abort`で元に戻す。`gh stack checkout`が失敗した、または入力を求めた場合も、そこでやめる。pushが失敗した場合も含め、上のPRのrebaseが済んでいないことをユーザーに伝え、rebaseは人に任せる。この後の再レビューやreadyへの切り替えは、そのまま進める。
 
 今回直したものに、Critical・Importantの指摘が含まれるかで分ける。「PRを分割する」の指摘を分割したときは、Importantを直したものとして扱う — 分割した後の差分が上限内に収まったかを、`review-pr`に測り直させるため。重さの付いていない指摘（人のコメントなど）はMinorとして扱う。
 
