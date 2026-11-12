@@ -76,14 +76,15 @@ git fetch origin <baseRefName>
 git merge-base --is-ancestor origin/<baseRefName> HEAD
 ```
 
-2つ目のコマンドがPRを1件も返さなければ、stackの途中ではないので、rebaseしない（`main`などが進んだだけのPRは、ここでは扱わない）。4つ目のコマンドが成功すれば、baseブランチは先に進んでいないので、rebaseしない。どちらでもなければ、rebaseしてforce pushする:
+2つ目のコマンドがPRを1件も返さなければ、stackの途中ではないので、rebaseしない（`main`などが進んだだけのPRは、ここでは扱わない）。4つ目のコマンドが成功すれば、baseブランチは先に進んでいないので、rebaseしない。どちらでもなければ、`gh stack`でrebaseしてpushする。`gh stack checkout`は、手元にstackの情報が無ければGitHubから取ってくる（あれば何もしない）。`--no-trunk`を付けて、trunkには触れない:
 
 ```bash
-git rebase origin/<baseRefName>
-git push --force-with-lease=<headRefName>:<headRefOid> origin <headRefName>
+gh stack checkout <N>
+gh stack rebase --downstack --no-trunk
+gh stack push
 ```
 
-このrebaseが素直に通るのは、下のPRに修正を足しただけの場合である。下のPRそのものが書き換えられている（trunkの上にrebaseされた、など）と、古い下のPRのコミットまで積み直そうとして、コンフリクトすることがある。rebaseがコンフリクトした場合は、`git rebase --abort`で元に戻して停止し、ユーザーに伝える。force pushが失敗した、または止められた場合も停止し、手元はrebase済みでoriginは元のままであることと、`git reset --hard <headRefOid>`で手元を戻せることを伝える。rebaseした場合は、Step 6の対応報告にその旨を書く。
+rebaseがコンフリクトした、または別のworktreeの変更などで止まった場合は、`gh stack rebase --abort`で元に戻して停止し、ユーザーに伝える。`gh stack checkout`が手元とGitHubのstackの食い違いの解決を求めた場合も、そこで停止する。pushが失敗した、または止められた場合も停止し、手元はrebase済みでoriginは元のままであることと、`git reset --hard <headRefOid>`で手元を戻せることを伝える。rebaseした場合は、Step 6の対応報告にその旨を書く。
 
 指摘をそのまま信じない。該当するコードを読んで、指摘が正しいかを確かめてから、次のいずれかに分ける:
 
@@ -124,7 +125,9 @@ git push --force-with-lease=<headRefName>:<headRefOid> origin <headRefName>
 
 `split-pr`は、新しいPRの番号とURLを返す。分割した後は、下の「別のPRへ移った指摘を仕分け直す」に進む。
 
-`split-pr`が分割を終えずに停止した場合（分け方の判断でユーザーが分割をやめた、pushが止められた、stackを作れなかった、など）は、このskillも停止する。Step 5以降に進まず、`split-pr`が伝えた理由と、まだ対応していない指摘が残っていることをユーザーに伝える。指摘には対応済みの印を付けていないので、このskillをもう一度呼べば、次の回に拾い直される。ただし、`split-pr`がブランチを途中まで組み替えて止まった場合は、手元のHEADがPRのheadと一致せず、Step 3で止まる。`split-pr`が伝えた続け方か戻し方を先に済ませてから、もう一度呼ぶよう伝える。
+分け方の判断でユーザーが分割をやめた場合は、分割の指摘を「見送る」に確定させ、残りの指摘の対応に進む。対応報告の「見送ったもの」に、その理由を書く。
+
+それ以外で`split-pr`が分割を終えずに停止した場合（pushが止められた、stackを作れなかった、など）は、このskillも停止する。Step 5以降に進まず、`split-pr`が伝えた理由と、まだ対応していない指摘が残っていることをユーザーに伝える。指摘には対応済みの印を付けていないので、このskillをもう一度呼べば、次の回に拾い直される。ただし、`split-pr`がブランチを途中まで組み替えて止まった場合は、手元のHEADがPRのheadと一致せず、Step 3で止まる。`split-pr`が伝えた続け方か戻し方を先に済ませてから、もう一度呼ぶよう伝える。
 
 `split-pr`が分割した後は、手元のブランチが組み替わっている。Step 5では、組み替わった後のこのPRのブランチに修正を積む。
 
@@ -134,7 +137,7 @@ git push --force-with-lease=<headRefName>:<headRefOid> origin <headRefName>
 
 移った先の候補は、このPRの上に積んだPRである。「分割する」なら`split-pr`が返した新しいPR、「分割済み」なら`gh pr list --base <headRefName> --state open`で見つかるPRと、さらにその上に積んだPRを使う。
 
-Step 3で仕分けた指摘を、区分を問わず1件ずつ見直す。移ったかどうかは、ファイル単位ではなく、指摘された行の変更が、このPRの差分に含まれるかで判定する — 同じファイルが複数のPRで変更されていることがあるため。このPRの差分は、分岐点から求める:
+Step 3で仕分けた指摘を、区分を問わず1件ずつ見直す。移ったかどうかは、ファイル単位ではなく、指摘された行の変更が、このPRの差分に含まれるかで判定する — 同じファイルが複数のPRで変更されていることがあるため。指摘の行番号は、分割する前のhead（Step 3で確かめた`headRefOid`）のファイルを指すので、そのコミットのファイルで該当する行を確かめる。このPRの差分は、分岐点から求める:
 
 ```bash
 gh pr view <N> --json baseRefName
@@ -204,7 +207,7 @@ mutation($id:ID!){minimizeComment(input:{subjectId:$id,classifier:RESOLVED}){min
 - `### 直したもの` — 指摘ごとに、場所・直した内容・コミットのSHA
 - `### 見送ったもの` — 指摘ごとに、理由
 - `### 別issueに切り出したもの` — 指摘ごとに、issueのリンク
-- `### 分割したもの` — 「PRを分割する」の指摘への返答。分割した新しいPRの番号とリンクを並べ、このPRを`review-pr`で再レビューする旨を添える。レビュー結果はPR全体へのコメントで、スレッドへの返信ができないため、ここで返す
+- `### 分割したもの` — 「PRを分割する」の指摘への返答。分割した新しいPRの番号とリンクを並べる。再レビューの回数が2回未満ならこのPRを`review-pr`で再レビューする旨を、2回に達していればまだ再レビューを通っていない旨を添える。レビュー結果はPR全体へのコメントで、スレッドへの返信ができないため、ここで返す
 - `### 分割済みだったもの` — 「分割済み」とした「PRを分割する」の指摘。上に積んだPRの番号とリンクを並べる。再レビューの一文は付けない
 - `### 分割で別のPRへ移ったもの` — 指摘ごとに、移った先のPRのリンク
 - `### 質問への回答` — PR全体へのコメントやレビュー本文に書かれた質問への回答。行コメントの質問はスレッドで答えたので、ここには1で控えた返信のURLだけを並べる
@@ -215,14 +218,16 @@ gh pr comment <N> --body-file <一時ファイル>
 
 ## Step 7: 次に進む
 
-今回このPRにpushし（Step 3のrebaseを含む）、このPRの上にstackで積んだPR（このPRのheadブランチをbaseにする、開いているPR）があれば、先に上のPRをrebaseする — 下のPRにpushすると、上のPRをrebaseするまでstackをマージできないため（出典: https://docs.github.com/en/pull-requests/reference/stacked-pull-requests ）。手元にstackの情報が無ければ、`gh stack rebase`が失敗するので、`gh stack checkout <N>`で取ってきてからやり直す:
+今回このPRにpushし（Step 3のrebaseを含む）、このPRの上にstackで積んだPR（このPRのheadブランチをbaseにする、開いているPR）があれば、先に上のPRをrebaseする — 下のPRにpushすると、上のPRをrebaseするまでstackをマージできないため（出典: https://docs.github.com/en/pull-requests/reference/stacked-pull-requests ）。`--no-trunk`を付けて、このPR自体をtrunkの上に積み直さないようにする（`--no-trunk`はfetchもしないので、先にfetchする）。分割した直後は手元にstackの情報が無いので、`gh stack checkout`で取ってくる:
 
 ```bash
-gh stack rebase --upstack
+git fetch origin
+gh stack checkout <N>
+gh stack rebase --upstack --no-trunk
 gh stack push
 ```
 
-rebaseがコンフリクトした、または別のworktreeの変更などで止まった場合は、`gh stack rebase --abort`で元に戻す。pushが失敗した場合も含め、上のPRのrebaseが済んでいないことをユーザーに伝え、rebaseは人に任せる。この後の再レビューやreadyへの切り替えは、そのまま進める。
+rebaseがコンフリクトした、または別のworktreeの変更などで止まった場合は、`gh stack rebase --abort`で元に戻す。`gh stack checkout`が食い違いの解決を求めた場合も、そこでやめる。pushが失敗した場合も含め、上のPRのrebaseが済んでいないことをユーザーに伝え、rebaseは人に任せる。この後の再レビューやreadyへの切り替えは、そのまま進める。
 
 今回直したものに、Critical・Importantの指摘が含まれるかで分ける。「PRを分割する」の指摘を分割したときは、Importantを直したものとして扱う — 分割した後の差分が上限内に収まったかを、`review-pr`に測り直させるため。重さの付いていない指摘（人のコメントなど）はMinorとして扱う。
 
