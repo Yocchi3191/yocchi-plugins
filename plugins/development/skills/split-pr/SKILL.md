@@ -37,7 +37,7 @@ gh stack --version
 
 `baseRefName`・`headRefName`・`headRefOid`・タイトル・本文を控えておく。
 
-**すでにstackの途中にあるPRの場合:** 分割してできたBが、さらに上限を超えていた場合などである。stackの形を調べる:
+**すでにstackに入っているPRの場合:** 分割してできたBが、さらに上限を超えていた場合などである。stackの形を調べる:
 
 ```bash
 gh pr list --base <headRefName> --state open --json number,headRefName
@@ -46,7 +46,12 @@ gh pr list --head <baseRefName> --state open --json number,baseRefName
 
 1つ目は、このPRの上に積んだPR（上のPR）、2つ目は、このPRの下のPR（下のPR）を返す。下のPRがあれば、さらにその`baseRefName`で同じように下へたどり、下のPRが無くなるまで繰り返す。一番下のPRの`baseRefName`がstackのtrunkである。上のPRも同じように上へたどる。どれかで2件以上返ってきたら、stackが枝分かれしているので、停止してユーザーに伝える。
 
-このPRをBとすると、分割した後のstackは、A ← B1 ← B2 ← C の形にする（B1 = 分割した後のB）。Cのコミットは、分割する前のBのコミットの上に積まれているので、Cのbaseを、Bから作った一番上の新しいブランチに付け替えるだけでよく、Cをrebaseする必要はない（Step 6）。下のPRも上のPRも無ければ、このPRがAにあたり、以降の手順をそのまま進める。
+このPRをBとすると、分割した後のstackは、A ← B1 ← B2 ← C の形にする（B1 = 分割した後のB）。次の2つは、別々に判定する:
+
+- **下のPRがあるか:** あれば、このPRはBで、本文はB・C…の形に書き直す（Step 7）。無ければ、このPRがAで、本文は全体の説明として残す
+- **上のPRがあるか:** あれば、Cのbaseを、このPRから作った一番上の新しいブランチに付け替え、stack全体をlinkし直す（Step 6）。Cのコミットは分割する前のBのコミットの上に積まれているので、Cをrebaseする必要はない
+
+どちらも無ければ、以降の手順をそのまま進める。
 
 ## Step 3: 分け方を決める
 
@@ -80,11 +85,11 @@ Aの区切りの始まりは分岐点、B以降の区切りの始まりは1つ�
 
 ## Step 4: 新しいブランチを作り、pushする
 
-B・C…のブランチを、それぞれの区切りの終わりのコミットに作る。名前は`<headRefName>-part2`、`<headRefName>-part3`…とする。同じ名前のブランチが手元かoriginにすでにあれば、停止してユーザーに伝える:
+B・C…のブランチを、それぞれの区切りの終わりのコミットに作る。名前は`<headRefName>-2`、`<headRefName>-3`…とする（`x-2`を分割すると`x-2-2`になる）。同じ名前のブランチが手元かoriginにすでにあれば、停止してユーザーに伝える:
 
 ```bash
-git branch <headRefName>-part<k> <区切りの終わりのコミット>
-git push -u origin <headRefName>-part2 <headRefName>-part3 ...
+git branch <headRefName>-<k> <区切りの終わりのコミット>
+git push -u origin <headRefName>-2 <headRefName>-3 ...
 ```
 
 Aのブランチを書き換える前に、B・C…を作ってpushしておく — 書き換えの途中で止まっても、上のコミットが失われないようにするため。
@@ -114,17 +119,15 @@ pushが失敗した、または止められた場合は、停止してユーザ�
 `gh stack link`で、AのPRとB・C…のブランチを下から順にstackにする。PRの無いブランチには、すぐ下のブランチをbaseにしたPRが作られる:
 
 ```bash
-gh stack link --base <baseRefName> <N> <headRefName>-part2 <headRefName>-part3 ...
+gh stack link --base <baseRefName> <N> <headRefName>-2 <headRefName>-3 ...
 ```
 
-**すでにstackの途中にあるPRの場合（Step 2）:** 先に、上のPRのbaseを、このPRから作った一番上の新しいブランチに付け替える。そのうえで、stack全体を下から順に並べてlinkする。`--base`にはstackのtrunkを渡す:
+**上のPRがある場合（Step 2）:** 先に、上のPRのbaseを、このPRから作った一番上の新しいブランチに付け替える。そのうえで、stack全体を下から順に並べてlinkする。`--base`にはstackのtrunkを渡す:
 
 ```bash
 gh pr edit <上のPRの番号> --base <一番上の新しいブランチ>
 gh stack link --base <trunk> <下のPRたち> <N> <新しいブランチたち> <上のPRたち>
 ```
-
-linkの後、各PRの`baseRefName`が1つ下のPRのheadブランチになっているかを確かめる。順番が合っていなければ、停止してユーザーに伝える。
 
 `--open`は付けない。
 
@@ -138,7 +141,7 @@ linkの後、各PRの`baseRefName`が1つ下のPRのheadブランチになって
 作られたPRの番号と状態を確かめる:
 
 ```bash
-gh pr view <headRefName>-part<k> --json number,url,isDraft,baseRefName
+gh pr view <headRefName>-<k> --json number,url,isDraft,baseRefName
 ```
 
 `isDraft`が`false`なら、`gh pr ready --undo <番号>`でDraftに戻す — 新しいPRは、このskillではレビューにかけないため（Step 8）。`baseRefName`が1つ下のブランチになっていなければ、停止してユーザーに伝える。
@@ -171,7 +174,7 @@ gh pr view <headRefName>-part<k> --json number,url,isDraft,baseRefName
 
 割り当てをしなかった場合は、表の「対応するREQ」の列を省く。
 
-すでにstackの途中にあるPR（Step 2）を分割した場合は、このPRの本文の「全体の説明は #<A> にある」が指すPRが、全体の説明を持つAである。このPRの本文は新しいPRと同じ形に書き直し、Aの本文の`## 分割`の表に、新しいPRの行を足す（このPRの行のREQとコミットも直す）。
+下のPRがあるPR（Step 2）を分割した場合は、このPRの本文の「全体の説明は #<A> にある」が指すPRが、全体の説明を持つAである。このPRのタイトルと本文は、新しいPRと同じ規則で書き直し、Aの本文の`## 分割`の表に、新しいPRの行を足す（このPRの行のREQとコミットも直す）。Aのタイトルは変えない。このPRの本文に「全体の説明は #<A> にある」や「このPRで対応しているREQ:」が無ければ（手で組んだstackなど）、どのPRが全体の説明を持つかと、このPRが受け持つREQを、本文を書く前にユーザーに聞く。
 
 **B・C…:** タイトルは、そのPRに入ったコミットが何をするかを表すものにする。stackの何番目かは書かない — 順番はstackの構造で分かり、番号を入れると分割のたびに振り直しが要るため。本文は次のとおり:
 
