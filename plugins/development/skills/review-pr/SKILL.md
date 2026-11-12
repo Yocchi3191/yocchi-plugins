@@ -57,6 +57,8 @@ gh issue view <matched-N> --json body -q .body
 
 このコマンドが失敗した場合（issueが削除された、番号が誤っている、非公開でアクセスできない等）、処理を止めたりPLAN_OR_REQUIREMENTSを空のままにしたりせず、下記の「マッチしない場合」と同様にPR自身のタイトルと本文にフォールバックし、参照先issueを取得できなかった旨を最終報告に記載する。
 
+PR本文に`## 分割`の節があり、その中に「このPRで対応しているREQ:」の行があれば、そのPRは`split-pr`で分割したstackの1つである。issueの本文に加えて、`## 分割`の節をPLAN_OR_REQUIREMENTSに添え、「このPRの要件は、この行に書かれたREQだけである。ほかのREQは、stackのほかのPRで満たす」と書き添える — issueのREQをすべてこのPRの要件にすると、ほかのPRで満たすREQが「足りない」と指摘されるため。
+
 - **マッチしない場合:** 他の方法でissueを探しに行かない。代わりにPR自身のタイトルと本文（Step 2で取得済み）をPLAN_OR_REQUIREMENTSとして使う。`Closes`/`Part of`参照の無いPRは正常な状態であり、エラーではない。
 
 ## Step 4: DESCRIPTIONを解決する
