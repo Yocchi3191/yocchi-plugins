@@ -85,7 +85,7 @@ gh stack rebase --downstack --no-trunk
 gh stack push
 ```
 
-**stackの各ブランチをoriginに揃える:** `--no-trunk`は、fetchも手元のブランチの更新もしない。手元のブランチが古いまま`gh stack push`すると、originにある新しいコミットを巻き戻してしまう。そこで、rebaseの前に、stackのブランチを1つずつoriginと比べる。対象は、`gh stack view --json`の`branches`のうち、`isMerged`が`false`で、今いるブランチ以外のもの（今いるブランチは、PRのheadと一致することを確かめ済み）:
+**stackの各ブランチをoriginに揃える:** `--no-trunk`は、fetchも手元のブランチの更新もしない。手元のブランチが古いまま`gh stack push`すると、originにある新しいコミットを巻き戻してしまう。そこで、rebaseの前に、stackのブランチを1つずつoriginと比べる。対象は、`gh stack view --json`の`branches`のうち、`isMerged`が`false`で、今いるブランチより下のもの（`branches`は下から上の順に並ぶ。ここでのrebaseは`--downstack`で、上のブランチには触れないため、上のブランチは見ない。今いるブランチは、PRのheadと一致することを確かめ済み）:
 
 ```bash
 git fetch origin
@@ -99,7 +99,7 @@ git fetch origin <ブランチ>:<ブランチ>
 - 手元がoriginの祖先なら（4つ目のコマンドが成功する）、手元が遅れているだけなので、5つ目のコマンドでfast-forwardする。
 - それ以外（手元が進んでいる、分岐している、fast-forwardに失敗した）は、手元とoriginのどちらが正しいかを決められないので、停止してユーザーに伝える。
 
-rebaseがコンフリクトした、または別のworktreeの変更などで止まった場合は、`gh stack rebase --abort`で元に戻して停止し、ユーザーに伝える。`gh stack checkout`が失敗した、または入力を求めた場合も、そこで停止する。pushが失敗した、または止められた場合も停止し、手元はrebase済みでoriginは元のままであることと、`git reset --hard <headRefOid>`で手元を戻せることを伝える。rebaseした場合は、Step 6の対応報告にその旨を書く。rebaseした後も、指摘の行番号はrebase前のhead（`headRefOid`）のファイルを指すので、下の仕分けでは、そのコミットのファイルで該当する行を確かめる。
+rebaseがコンフリクトした、または別のworktreeの変更などで止まった場合は、`gh stack rebase --abort`で元に戻して停止し、ユーザーに伝える。`gh stack checkout`が失敗した、または入力を求めた場合も、そこで停止する。pushが失敗した、または止められた場合も停止し、手元はrebase済みでoriginは元のままであることと、`git reset --hard <headRefOid>`で、このPRのブランチの手元を戻せることを伝える。下のブランチも手元でrebaseされているかもしれないので、下のブランチは`gh stack view --json`の`head`（rebase前の値）で戻せることも添える。rebaseとpushのあと、`git branch --show-current`が`headRefName`と違えば、`git switch <headRefName>`で戻す。rebaseした場合は、Step 6の対応報告にその旨を書く。rebaseした後も、指摘の行番号はrebase前のhead（`headRefOid`）のファイルを指すので、下の仕分けでは、そのコミットのファイルで該当する行を確かめる。
 
 指摘をそのまま信じない。該当するコードを読んで、指摘が正しいかを確かめてから、次のいずれかに分ける:
 
@@ -243,7 +243,7 @@ gh stack rebase --upstack --no-trunk
 gh stack push
 ```
 
-checkoutの後、rebaseの前に、Step 3の「stackの各ブランチをoriginに揃える」と同じ手順で、上のPRのブランチをoriginに揃える。揃えられなかったら、そこでやめる。rebaseがコンフリクトした、または別のworktreeの変更などで止まった場合は、`gh stack rebase --abort`で元に戻す。`gh stack checkout`が失敗した、または入力を求めた場合も、そこでやめる。pushが失敗した場合も含め、上のPRのrebaseが済んでいないことをユーザーに伝え、rebaseは人に任せる。この後の再レビューやreadyへの切り替えは、そのまま進める。
+checkoutの後、rebaseの前に、Step 3の「stackの各ブランチをoriginに揃える」と同じ手順で、上のPRのブランチ（今いるブランチより上で、`isMerged`が`false`のもの）をoriginに揃える。揃えられなかったら、そこでやめる。rebaseがコンフリクトした、または別のworktreeの変更などで止まった場合は、`gh stack rebase --abort`で元に戻す。`gh stack checkout`が失敗した、または入力を求めた場合も、そこでやめる。pushが失敗した場合も含め、上のPRのrebaseが済んでいないことをユーザーに伝え、rebaseは人に任せる。rebaseとpushのあと、`git branch --show-current`が`headRefName`と違えば、`git switch <headRefName>`で戻す。この後の再レビューやreadyへの切り替えは、そのまま進める。
 
 今回直したものに、Critical・Importantの指摘が含まれるかで分ける。「PRを分割する」の指摘を分割したときは、Importantを直したものとして扱う — 分割した後の差分が上限内に収まったかを、`review-pr`に測り直させるため。重さの付いていない指摘（人のコメントなど）はMinorとして扱う。
 
