@@ -36,7 +36,7 @@ mutation($id:ID!){minimizeComment(input:{subjectId:$id,classifier:RESOLVED}){min
 
 ## 3. 対応報告
 
-最後に、今回の対応全体をまとめたコメントをPRに投稿する（`gh pr comment <N> --body-file <一時ファイル>`）。本文の1行目は目印 `<!-- fix-review -->`。Step 7で再レビューを頼む場合（今回分割した、またはCritical・Importantを直した回で、再レビューの回数が2回未満のとき）は、2行目を `<!-- fix-review:rereview -->` にする。見出しは次のとおりで、該当が無いものは省く。
+最後に、今回の対応全体をまとめたコメントをPRに投稿する（`gh pr comment <N> --body-file <一時ファイル>`）。本文の1行目は目印 `<!-- fix-review -->`。Step 7で再レビューを頼む場合（今回分割した、または重い指摘（Critical・Important、重いと見積もったもの）を直した回で、再レビューの回数が2回未満のとき）は、2行目を `<!-- fix-review:rereview -->` にする。見出しは次のとおりで、該当が無いものは省く。
 
 - `## レビュー対応（<n>回目）` — `<n>` は数えた対応の回数 + 1
 - `### 直したもの` — 指摘ごとに、場所・直した内容・コミットのSHA
