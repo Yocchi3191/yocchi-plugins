@@ -13,8 +13,9 @@
 # - バイト数: 追加と削除の行の中身（先頭の+/-を除く）の合計。
 # - .gitattributes で linguist-generated が指定されたファイルと、引数で渡されたファイルは数えない。
 #   .gitattributes はチェックアウト中のものが読まれる。
-# - 空の配列を展開してもset -uで落ちないよう、macOS標準のbash 3.2でも通る書き方にしている。
 # - リネームしただけのファイルは -M で0行になる。削除したファイルは数に入る。
+#   リネームしたファイルを除外するときは、新旧両方のパスを渡す。新しいパスだけだと、
+#   リネーム元が見えなくなってリネームと判定されず、旧パスの削除として全行が数えられる。
 # - --no-color・--no-ext-diff は省かない。色付けや外部のdiffツールが有効だと、
 #   @@ の行を見分けられず、エラーにならないまま0行・0バイトと数えてしまうため。
 # - pathspecはリポジトリのルート基準（:/・top）で書く。サブディレクトリで実行しても、
@@ -37,6 +38,7 @@ for p in "$@"; do
 done
 
 # 先に差分を取り切る。パイプでつなぐと、gitが失敗してもawkが0行・0バイトを出力してしまうため。
+# ${excludes[@]+...}は、除外するファイルが無く配列が空のときも、set -uで落ちないための書き方（macOS標準のbash 3.2でも通る）。
 diff="$(git diff --no-color --no-ext-diff -M "$base..$head" -- ':/' ':(top,exclude,attr:linguist-generated)' ':(top,exclude,attr:linguist-generated=true)' ${excludes[@]+"${excludes[@]}"})"
 
 printf '%s\n' "$diff" \
