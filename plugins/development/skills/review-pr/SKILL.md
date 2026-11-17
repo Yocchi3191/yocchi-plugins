@@ -26,7 +26,7 @@ PR本文の`Closes #N`（無ければ`Part of #M`）のissue本文を要件と�
 ## Step 5: 結果をPRに反映する
 
 1. 差分が上限を超えていれば、「PRを分割する」をImportantの指摘として足し、Assessmentをマージ不可側にする
-2. **状態を変える前に**、結果を `gh pr comment` で投稿する。失敗したら止まる
+2. **状態を変える前に**、結果を `gh pr comment` で投稿する。失敗したら（権限不足、PRが閉じられた等）ユーザーに報告して停止し、readyにも`fix-review`にも進まない
 3. 結果に応じて動く:
    - **差分の大きさを測れなかった:** ready にも`fix-review`にもせず停止し、理由を伝える
    - **Critical・Importantが1件でもある:** Draftのまま、`development:fix-review`をPR番号で呼ぶ。自分では指摘を直さない（レビュー側は読み取り専用）
