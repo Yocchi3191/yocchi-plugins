@@ -26,7 +26,7 @@ gh stack push
 
 ## stackの各ブランチをoriginに揃える
 
-`--no-trunk` はfetchも手元のブランチの更新もしない。手元が古いまま `gh stack push` すると、originの新しいコミットを巻き戻してしまう。rebaseの前に、`gh stack view --json` の `branches` のうち、`isMerged` が `false` で、対象より下のもの（Step 3は今のブランチより下、Step 7は上）を1つずつoriginと比べる。
+`--no-trunk` はfetchも手元のブランチの更新もしない。手元が古いまま `gh stack push` すると、originの新しいコミットを巻き戻してしまう。rebaseの前に、`gh stack view --json` の `branches`（下から上の順に並ぶ）のうち、`isMerged` が `false` で、対象より下のもの（Step 3は今のブランチより下、Step 7は上）を1つずつoriginと比べる。
 
 ```bash
 git fetch origin
