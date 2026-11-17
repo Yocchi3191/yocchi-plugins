@@ -1,43 +1,19 @@
 ---
 name: review-pr
-description: ユーザーが特定のPRのレビューを求めている場合に使う — 例:「PR #40をレビューして」「review-pr 40」。PR自体からBASE_SHA/HEAD_SHA/PLAN_OR_REQUIREMENTS/DESCRIPTIONを解決し、実際のレビューは`development:review`に委譲する。差分の大きさがレビュー規約（review-rules.md）の上限を超えていれば、PRの分割をImportantの指摘として足す。レビュー結果はPR状態を変更する前に`gh pr comment`でPRへ投稿する。指摘が無ければ`gh pr ready`でPRをready for reviewに変換し、指摘があればDraftのまま`development:fix-review`に対応を引き継ぐ。submitやfix-reviewからも続けて呼ばれる。指摘があるとfix-reviewが修正とpushまで行うので、直さずにレビューだけが欲しい場合は`development:review`を使う。
+description: ユーザーが特定のPRのレビューを求めている場合に使う。PRからBASE_SHA/HEAD_SHA/要件/概要を解決して`development:review`に委譲し、結果をPRにコメントする。Critical・Importantの指摘があればDraftのまま`development:fix-review`へ引き継ぎ、無ければ（Minorだけでも）`gh pr ready`でreadyにする。submitやfix-reviewからも呼ばれる。直さずレビューだけが欲しいときは`development:review`を使う。
 ---
 
 # Review PR
 
-入力が「現在の作業ブランチ」ではなくPR番号である場合の、`development:review`に対する薄いアダプタ。レビュー本体は`review`が担い、このskillはそれをPR形式の入力に合わせるアダプタと、PRが存在して初めて意味を持つロジック（指摘が無ければready for reviewへ切り替え、あれば`fix-review`へ引き継ぐ処理）だけを担う。
+`development:review`の薄いアダプタ。PR形式の入力への変換と、PR状態の変更（ready／`fix-review`への引き継ぎ）だけを担う。細則（コマンド、issue参照、分割PR、分割指摘の文面）は `references/details.md` を読む。
 
-## Step 1: PR番号は必須
+## Step 1: PR番号とチェックアウト
 
-このskillは常にPR番号を必要とする。指定が無ければ求める — 現在のブランチから推測することは絶対にしない（それは`review`の仕事であり、このskillの仕事ではない）。
+PR番号は必須。無ければ求める（ブランチから推測しない）。PRのheadブランチを最新でチェックアウトしておく（一致しなければ`review`が止まる）。
 
-また、PRのheadブランチを最新の状態でチェックアウトしておく必要がある。レビュー役は前後の文脈をチェックアウト中のファイルから読むためで、一致しなければ`review`が止まる。
+## Step 2: 差分の範囲を決める
 
-## Step 2: PRからBASE_SHAとHEAD_SHAを解決する
-
-```bash
-gh pr view <N> --json baseRefName,headRefName,title,body
-```
-
-その出力から実際の`baseRefName`・`headRefName`の値を取得し、以下のすべてのコマンド内の`<baseRefName>`/`<headRefName>`をそれらの値に置き換える — 以下の2つのブロックはどちらもこの値に依存している。
-
-両方のrefをfetchし、ローカルのgitがdiffを取れるようコミットを用意する:
-
-```bash
-git fetch origin <baseRefName> <headRefName>
-```
-
-```bash
-git merge-base origin/<baseRefName> origin/<headRefName>
-git rev-parse origin/<headRefName>
-```
-
-- `BASE_SHA` = `git merge-base`の出力 — PRのheadブランチが実際のbaseブランチから分岐した地点（リポジトリのデフォルトブランチとは限らない — これにより、デフォルトブランチのみを対象とする`review`自身の自己算出とは異なり、別のPRに積み上げたPRに対しても`review-pr`が正しく動作する）。
-- `HEAD_SHA` = PRのheadブランチの最新コミット（`git rev-parse origin/<headRefName>`）。
-
-**適用範囲についての補足:** これはPRのheadブランチが`origin`上に存在することを前提としている（`submit`でpushしたブランチなら常に成立する）。フォーク由来のPRのheadブランチはこの方法では解決できない — この点はスコープ外とし、`submit`が`origin`へのpushについて置いている前提と同じである。
-
-`gh pr view <N>`が失敗した場合（該当PRが無い、リポジトリ指定が誤っている等）、処理を止めてユーザーに報告する。部分的なデータのまま処理を進めてはならない。
+BASE_SHA = PRのbaseとheadの分岐点（`git merge-base`）、HEAD_SHA = headの最新コミット。デフォルトブランチではなくPRのbaseから求めるので、stacked PRでも動く。`gh pr view`が失敗したら、部分的なデータで進めず停止して報告する。
 
 ## Step 3: PR本文からPLAN_OR_REQUIREMENTSを解決する
 
