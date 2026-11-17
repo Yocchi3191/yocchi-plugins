@@ -2,7 +2,7 @@
 type: raw-decision
 timestamp: <YYYY-MM-DDTHH:mm:ss>
 sources: []
-result: <ok | NG | unverified | none>
+result: <ok | NG | unverified | none | unsure>
 decided_by: <user | ai>
 ---
 
