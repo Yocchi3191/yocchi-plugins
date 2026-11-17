@@ -36,23 +36,15 @@ git commit -m "<推定したメッセージ>"
 
 ## Step 3: baseブランチを決めてpushする
 
-**baseブランチ:** ユーザーがbaseブランチを明示した場合は、その値をそのまま`<base-branch>`として使う。明示されていない場合は、リポジトリのデフォルトブランチを検出してそれを使う:
+baseは次の順で決める。
 
-```bash
-gh repo view --json defaultBranchRef -q .defaultBranchRef.name
-```
+1. ユーザーが明示したブランチ
+2. stacked PRの積み上げ元の親ブランチ（ユーザーが親PR・親ブランチに触れたとき。親をユーザーに確認する。分からなければ3へ）
+3. リポジトリのデフォルトブランチ（`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`）
 
-現在のブランチが`<base-branch>`そのものである場合、submitする対象が無い旨をユーザーに伝えて停止する — PRにはbaseと異なるheadブランチが必要である。
+headがbaseそのものなら、submitする対象が無いと伝えて停止する。
 
-pushする前に、新しく送るものがあるかを確認する:
-
-```bash
-git rev-list --count '@{u}' 2>/dev/null && git rev-list --count '@{u}..HEAD'
-```
-
-- **最初のコマンドが失敗する**（upstreamが未設定 — ブランチが一度もpushされていない）: pushする。
-- **2番目のコマンドが`0`を出力する**（ローカルHEADがupstreamより先のコミットを持たない）: pushをスキップする — 送るものが無い。
-- **それ以外:** pushする。
+pushの前に、送るものがあるか確かめる: `git rev-list --count '@{u}' 2>/dev/null && git rev-list --count '@{u}..HEAD'`。最初のコマンドが失敗（upstream未設定）ならpushする。2番目が `0` ならpushしない。それ以外はpushする。
 
 ```bash
 git push -u origin <head-branch>
@@ -88,29 +80,19 @@ gh pr create --draft --base <base-branch> --title "<title>" --body-file <埋め�
 
 `gh pr create`が失敗した場合は、Step 5へ進まず停止する — ADRメモの内容がPRに残っていないまま削除してしまうのを防ぐため。
 
-## Step 5: ADRメモを削除する — PR作成に成功した場合のみ
+## Step 5: ADRメモを削除する（PR作成に成功した場合のみ）
 
-ADRメモが無ければこのステップはスキップする。
-
-内容はPR本文に残ったので、`<adr-path>`を削除する。gitで追跡されているか（過去に誤ってコミットされていないか）で扱いが変わる:
+ADRメモが無ければスキップする。内容はPR本文に残ったので削除する。gitで追跡されているかで扱いが変わる:
 
 ```bash
 git ls-files --error-unmatch -- ':(top)<adr-path>'
 ```
 
-- **失敗する（未追跡）:** ファイルを削除するだけでよい。
-- **成功する（追跡済み）:** ブランチ上からも消すため、削除をコミットしてpushする:
-
-```bash
-git rm -f -- ':(top)<adr-path>'
-git commit -m "ADRメモを削除（内容はPR本文に展開済み）"
-git push
-```
+- **失敗（未追跡）:** ファイルを削除するだけ
+- **成功（追跡済み）:** 削除をコミットしてpushする（`git rm -f -- ':(top)<adr-path>'`、メッセージ「ADRメモを削除（内容はPR本文に展開済み）」、`git push`）
 
 ## Step 6: レビューへ引き継ぐ
 
-Step 5のコミットやpushが失敗した場合は、Step 6へ進まずユーザーに伝えて停止する — 手元とPRのheadがずれたままレビューを始めても、`fix-review`が手元の状態の確認で止まるため。
+Step 5のコミットやpushが失敗したら、ユーザーに伝えて停止する（手元とPRのheadがずれたままレビューを始めると、`fix-review` が止まるため）。
 
-PRの作成に成功したら（Step 5があればその後で）、ユーザーに確認せず、続けて`development:review-pr`を作成したPRの番号で呼び出す。以降、指摘があれば`review-pr`が`fix-review`へ引き継ぎ、指摘が無くなればどちらかがready for reviewに切り替える。
-
-PRを作るたびにユーザーがレビューを頼み直す手間をなくすため、この引き継ぎは省かない。
+成功したら、**ユーザーに確認せず**、続けて `development:review-pr` を作成したPRの番号で呼ぶ。この引き継ぎは省かない。
