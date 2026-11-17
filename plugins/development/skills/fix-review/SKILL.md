@@ -74,28 +74,7 @@ gh pr comment <N> --body-file <一時ファイル>
 
 ## Step 7: 次に進む
 
-今回このPRにpushし（Step 3のrebaseを含む）、このPRの上にstackで積んだPR（このPRのheadブランチをbaseにする、開いているPR）があれば、先に上のPRをrebaseする — 下のPRにpushすると、上のPRをrebaseするまでstackをマージできないため（出典: https://docs.github.com/en/pull-requests/reference/stacked-pull-requests ）。`--no-trunk`を付けて、このPR自体をtrunkの上に積み直さないようにする（`--no-trunk`はfetchもしないので、先にfetchする）。分割した直後は手元にstackの情報が無いので、`gh stack checkout`で取ってくる:
+pushしており、上にstackで積んだPRがあれば、先にその上のPRをrebaseする。そのうえで:
 
-```bash
-git fetch origin
-gh stack checkout <N>
-（stackの各ブランチをoriginに揃える）
-gh stack rebase --upstack --no-trunk
-gh stack push
-```
-
-checkoutの後、rebaseの前に、Step 3の「stackの各ブランチをoriginに揃える」と同じ手順で、上のPRのブランチ（今いるブランチより上で、`isMerged`が`false`のもの）をoriginに揃える。揃えられなかったら、そこでやめる。rebaseがコンフリクトした、または別のworktreeの変更などで止まった場合は、`gh stack rebase --abort`で元に戻す。`gh stack checkout`が失敗した、または入力を求めた場合も、そこでやめる。pushが失敗した場合も含め、上のPRのrebaseが済んでいないことをユーザーに伝え、rebaseは人に任せる。rebaseとpushのあと、`git branch --show-current`が`headRefName`と違えば、`git switch <headRefName>`で戻す。この後の再レビューやreadyへの切り替えは、そのまま進める。
-
-今回直したものに、Critical・Importantの指摘が含まれるかで分ける。「PRを分割する」の指摘を分割したときは、Importantを直したものとして扱う — 分割した後の差分が上限内に収まったかを、`review-pr`に測り直させるため。重さの付いていない指摘（人のコメントなど）はMinorとして扱う。
-
-- **Critical・Importantを直した場合:** 直した結果を確かめるため、再レビューする。
-  - Step 2で数えた再レビューの回数が2回未満なら、`development:review-pr`をPR番号`<N>`で呼び出す。
-  - 2回に達していれば（Step 4でユーザーが3回目の修正を選んだ場合）、再レビューせずに停止する。対応報告のURLと、まだ再レビューを通っていない旨を伝える。
-- **Minorだけを直した、または直したものが無い場合:** 再レビューはしない。PRがDraftなら、ready for reviewに切り替える:
-
-```bash
-gh pr view <N> --json isDraft -q .isDraft
-gh pr ready <N>
-```
-
-  すでにDraftでなければ切り替えは不要。直していないCritical・Importantが残っていてもreadyにする — 残っているのは、見送る・別issueに切り出す・3回目を直さないのいずれかをStep 4でユーザーが決めたもの、または分割で別のPRへ移ったものだけだから。最後に、対応報告のURLをユーザーに伝える。
+- **Critical・Importantを直した（分割を含む）:** 再レビューが2回未満なら`development:review-pr`を呼ぶ。2回に達していれば、再レビューせず停止して、まだ通っていないことを伝える
+- **それ以外:** 再レビューはせず、Draftなら`gh pr ready <N>`でreadyにする。対応報告のURLを伝える
