@@ -39,7 +39,7 @@ git fetch origin <ブランチ>:<ブランチ>
 - 手元がoriginの祖先なら、手元が遅れているだけなので、4つ目でfast-forwardする
 - それ以外（手元が進んでいる、分岐している、fast-forwardに失敗）は、どちらが正しいか決められないので、停止して伝える
 
-## 止まったとき
+## 止まったとき（Step 3）
 
 - rebaseがコンフリクトした、または別のworktreeの変更などで止まった: `gh stack rebase --abort` で戻して停止し、伝える
 - `gh stack checkout` が失敗した、または入力を求めた: そこで停止する
@@ -59,4 +59,4 @@ gh stack rebase --upstack --no-trunk
 gh stack push
 ```
 
-揃えられなかったら、そこでやめる。コンフリクトや停止、pushの失敗のときは、上のPRのrebaseが済んでいないことを伝え、rebaseは人に任せる。この後の再レビューやreadyへの切り替えは、そのまま進めてよい。
+止まったとき: コンフリクトや別のworktreeの変更なら、先に `gh stack rebase --abort` で戻す。揃えられなかった、`gh stack checkout` が失敗した・入力を求めた、pushが失敗した、のいずれも、そこでやめる。上のPRのrebaseが済んでいないことを伝え、rebaseは人に任せる。rebaseとpushのあと、`git branch --show-current` が `headRefName` と違えば `git switch <headRefName>` で戻す。この後の再レビューやreadyへの切り替えは、そのまま進めてよい。
