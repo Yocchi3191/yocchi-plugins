@@ -15,37 +15,15 @@ PR番号は必須。無ければ求める（ブランチから推測しない）
 
 BASE_SHA = PRのbaseとheadの分岐点（`git merge-base`）、HEAD_SHA = headの最新コミット。デフォルトブランチではなくPRのbaseから求めるので、stacked PRでも動く。`gh pr view`が失敗したら、部分的なデータで進めず停止して報告する。
 
-## Step 3: PR本文からPLAN_OR_REQUIREMENTSを解決する
+## Step 3: 要件と概要を決める
 
-Step 2で取得したPR本文からissue参照を探す:
+PR本文の`Closes #N`（無ければ`Part of #M`）のissue本文を要件とする。無い・取得失敗ならPRのタイトルと本文を使う（エラーにしない）。`## 分割`の節がある分割PRは、「このPRで対応しているREQ」だけをこのPRの要件とする。概要はタイトルと本文から1〜2文で書く。
 
-```
-/(?:Closes|Part of) #(\d+)/i
-```
+## Step 4: reviewに委譲する
 
-同じ本文内に`Closes #N`と`Part of #M`の両方が存在する場合は`Closes`を優先する — このPRが完全に解決することを意図しているissueを名指ししており、より具体的なシグナルだからである。
+4つの値（BASE_SHA、HEAD_SHA、要件、概要）を渡して`development:review`を呼ぶ。**`review`を必ず経由し**、ここから直接レビュー役を起動しない。`review`が結果を返さず止まったら、理由を報告して停止する（コメントも状態変更もしない）。
 
-- **マッチした場合:** そのissueの本文を取得し、PLAN_OR_REQUIREMENTSとして使う:
-
-```bash
-gh issue view <matched-N> --json body -q .body
-```
-
-このコマンドが失敗した場合（issueが削除された、番号が誤っている、非公開でアクセスできない等）、処理を止めたりPLAN_OR_REQUIREMENTSを空のままにしたりせず、下記の「マッチしない場合」と同様にPR自身のタイトルと本文にフォールバックし、参照先issueを取得できなかった旨を最終報告に記載する。
-
-PR本文に`## 分割`の節があり、その中に「このPRで対応しているREQ:」の行があれば、そのPRは`split-pr`で分割したstackの1つである。issueの本文に加えて、`## 分割`の節をPLAN_OR_REQUIREMENTSに添え、「このPRの要件は、この行に書かれたREQだけである。ほかのREQは、stackのほかのPRで満たす」と書き添える — issueのREQをすべてこのPRの要件にすると、ほかのPRで満たすREQが「足りない」と指摘されるため。
-
-- **マッチしない場合:** 他の方法でissueを探しに行かない。代わりにPR自身のタイトルと本文（Step 2で取得済み）をPLAN_OR_REQUIREMENTSとして使う。`Closes`/`Part of`参照の無いPRは正常な状態であり、エラーではない。
-
-## Step 4: DESCRIPTIONを解決する
-
-PRが何を行うかの簡潔な要約。タイトルと本文（Step 2）から推測する — 1〜2文程度。
-
-## Step 5: development:reviewに委譲する
-
-`development:review`を呼び出し、上記で解決した4つの値（BASE_SHA、HEAD_SHA、PLAN_OR_REQUIREMENTS、DESCRIPTION）を渡す。これにより`review`はStep 0のショートカットを取り、レビュー役の起動へ直行する — `review`に「現在の作業ブランチ」からこれらを再算出させてはならず、ここから直接レビュー役を起動してもいけない。必ず`review`を経由させ、実際のレビューディスパッチを担う場所を一箇所に保つ。
-
-## Step 6: レビュー結果に応じて行動する
+## Step 5: 結果をPRに反映する
 
 `review`がレビュー結果を返さずに止まった場合（チェックアウト中のコミットがPRのheadと違う、など）は、`review`が伝えた理由をそのままユーザーに報告して停止する。PRへのコメント投稿も状態の変更もしない。
 
