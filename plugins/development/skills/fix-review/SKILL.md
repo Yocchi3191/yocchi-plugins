@@ -13,46 +13,7 @@ PRに付いたレビュー指摘に対応する。レビューそのもの（指
 
 ## Step 2: まだ対応していない指摘を集める
 
-指摘はPR上の3か所に付く。対応済みかどうかの状態と合わせて、1回のクエリですべて取得する:
-
-```bash
-gh api graphql -F owner='{owner}' -F repo='{repo}' -F number=<N> -f query='
-query($owner:String!,$repo:String!,$number:Int!){
-  repository(owner:$owner,name:$repo){
-    pullRequest(number:$number){
-      comments(first:100){nodes{id url isMinimized body}}
-      reviews(first:100){nodes{id url isMinimized state body}}
-      reviewThreads(first:100){nodes{id isResolved comments(first:100){nodes{url path line body}}}}
-    }
-  }
-}'
-```
-
-- `comments`: PR全体へのコメント。`review-pr`のレビュー結果もここに入る。
-- `reviews`: 人がレビューを提出したときの本文（Request changesなど）。
-- `reviewThreads`: 差分の行に付いたコメントのスレッド。
-
-`{owner}`・`{repo}`は`gh`が今のリポジトリの値で自動的に埋めるので、そのまま書く。それぞれ100件を超えるPRは想定しない。
-
-**どれが未対応か:** このskillはStep 6で、対応を終えた指摘に「対応済み」の印を付ける — 行コメントのスレッドはresolveし、PR全体へのコメントとレビュー本文は「解決済み」として非表示にする。したがって、次のものが未対応である:
-
-- `comments`・`reviews`: `isMinimized`が`false`のもの
-- `reviewThreads`: `isResolved`が`false`のスレッド
-
-時刻では判定しない — 状態で判定すれば、取得後に付いたコメントや、途中で止まった回に拾った指摘も、次の回に正しく未対応として残るため。
-
-このうち、このskill自身の投稿は拾わない。このskillはStep 6で投稿するコメントの本文の1行目に目印を入れる — 対応報告には`<!-- fix-review -->`、行コメントのスレッドへの個別の返信には`<!-- fix-review:reply -->`。1行目がこのどちらかであるコメントは拾わない。「1行目」で判定し「含む」では判定しない — レビュー結果などが目印を引用しただけで、そのコメントを取りこぼさないようにするため。投稿者では見分けない — `review-pr`もこのskillも、ユーザーのGitHubアカウントで投稿するため。
-
-拾うのは指摘と質問。そのどちらとも読めないコメント（お礼、単なる相づちなど）は拾わない。
-
-未対応のスレッドは、最後のコメントまで読む。このskillの返信（1行目が`<!-- fix-review:reply -->`）が付いていて、その後に人のコメントが無ければ、前回返信した後にresolveする前で止まったものである — 返信は済んでいるので、Step 6で返信し直さずresolveだけする。返信の後に人のコメントがあれば、そのコメント（まだ直っていない、など）を新しい指摘・質問として扱う。
-
-**回数を数える:** 次の2つを数えておく。
-
-- 対応の回数: 1行目が`<!-- fix-review -->`のコメントの件数。Step 6の見出しに使う。
-- 再レビューの回数: 1行目が`<!-- fix-review -->`で、2行目が`<!-- fix-review:rereview -->`のコメントの件数。このskillが再レビューを頼んだ回の対応報告にだけ付く目印で、質問に答えただけの回、Minorだけを直した回は数えない。今回分割した回は、Importantの指摘に対応した回として数える。「分割済み」とした回は数えない。Step 3とStep 7で、再レビューを続けるかどうかの判断に使う。
-
-未対応の指摘・質問が1件も無ければ、その旨をユーザーに伝えて停止する。
+PR全体のコメント・レビュー本文・行コメントのスレッドから、未対応の指摘と質問を集める。自分の過去の投稿は拾わない。1件も無ければ、伝えて停止する。
 
 ## Step 3: 仕分ける
 
