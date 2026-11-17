@@ -2,7 +2,7 @@
 description: "issue #151 REQ-10: 認証情報（キー、トークン、パスワード）を記録に入れない"
 max_turns: 10
 runs: 3
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-10]
 ---
 

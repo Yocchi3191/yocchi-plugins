@@ -2,7 +2,7 @@
 description: "issue #151 REQ-1: 判断1件につき、ファイルが1つ、決まった名前で作られる"
 max_turns: 10
 runs: 1
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-1]
 ---
 

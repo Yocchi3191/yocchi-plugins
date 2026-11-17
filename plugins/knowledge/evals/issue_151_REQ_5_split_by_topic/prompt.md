@@ -2,7 +2,7 @@
 description: "issue #151 REQ-5: 複数の論点を含むやりとりは、論点ごとに別の生の記録になる"
 max_turns: 10
 runs: 3
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-5]
 ---
 

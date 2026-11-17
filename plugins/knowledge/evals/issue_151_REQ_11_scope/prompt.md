@@ -2,7 +2,7 @@
 description: "issue #151 REQ-11: okの大きい判断とNGの判断を記録し、okの小さい判断は記録しない"
 max_turns: 10
 runs: 5
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-11]
 ---
 

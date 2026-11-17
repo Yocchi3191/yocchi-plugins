@@ -2,7 +2,7 @@
 description: "issue #151 REQ-7: 過去の資料から拾った判断の結果は、unverified"
 max_turns: 10
 runs: 3
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-7]
 ---
 

@@ -2,7 +2,7 @@
 description: "issue #151 REQ-4: 元の資料に案がないとき、案を推測で補い、推測の印を付ける"
 max_turns: 10
 runs: 3
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-4]
 ---
 

@@ -2,7 +2,7 @@
 description: "issue #151 REQ-7: AIの提案がない判断には、評価（result）を付けない"
 max_turns: 10
 runs: 3
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-7, REQ-8]
 ---
 

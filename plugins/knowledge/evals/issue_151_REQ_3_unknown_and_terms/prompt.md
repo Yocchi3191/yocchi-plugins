@@ -2,7 +2,7 @@
 description: "issue #151 REQ-3: 書かれていない節は「不明」になる。プロジェクト特有の語は残る"
 max_turns: 10
 runs: 1
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-3]
 ---
 

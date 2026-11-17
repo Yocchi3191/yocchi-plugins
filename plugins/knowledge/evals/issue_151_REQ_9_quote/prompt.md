@@ -2,7 +2,7 @@
 description: "issue #151 REQ-9: 会話から作る生の記録には、判断に関わるユーザーの発言の短い引用を付ける"
 max_turns: 10
 runs: 3
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-9]
 ---
 

@@ -2,7 +2,7 @@
 description: "issue #151 REQ-6: AIの提案に対する評価。okは受け入れ、NGは修正や別案の指示"
 max_turns: 10
 runs: 3
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-6]
 ---
 

@@ -2,7 +2,7 @@
 description: "issue #151 REQ-12: 会話から作る生には、そのセッションが関わったissue、PR、作業メモの参照だけを付ける"
 max_turns: 10
 runs: 3
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-12]
 ---
 

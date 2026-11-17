@@ -2,7 +2,7 @@
 description: "issue #151 REQ-8: ユーザーが「わからない」と答え、AIの推奨に従った判断は、decided_by: ai"
 max_turns: 10
 runs: 3
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-8]
 ---
 

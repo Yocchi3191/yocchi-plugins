@@ -2,7 +2,7 @@
 description: "issue #151 REQ-2: 生の記録が、テンプレートの骨格（フロントマターの必須項目、本文の節の見出し）を満たす"
 max_turns: 10
 runs: 1
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-2]
 ---
 

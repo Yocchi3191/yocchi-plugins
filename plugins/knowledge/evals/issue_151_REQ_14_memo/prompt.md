@@ -2,7 +2,7 @@
 description: "issue #151 REQ-14: ほかの節に入らないが加工に要りそうな情報は、メモの節に入れる"
 max_turns: 10
 runs: 3
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 tags: [issue-151, REQ-14]
 ---
 
