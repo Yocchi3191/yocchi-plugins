@@ -76,5 +76,5 @@ gh pr comment <N> --body-file <一時ファイル>
 
 pushしており、上にstackで積んだPRがあれば、先にその上のPRをrebaseする。そのうえで:
 
-- **重い指摘（Critical・Important、重いと見積もったもの）を直した（分割を含む）:** 再レビューが2回未満なら`development:review-pr`を呼ぶ。2回に達していれば、再レビューせず停止して、まだ通っていないことを伝える
-- **それ以外:** 再レビューはせず、Draftなら`gh pr ready <N>`でreadyにする。対応報告のURLを伝える
+- **重い指摘（Critical・Important、重いと見積もったもの）を直した（分割を含む）:** 再レビューが2回未満なら`development:review-pr`を呼ぶ。2回に達していれば、再レビューせず停止して、まだ通っていないことと、対応報告のURLを伝える
+- **それ以外:** 再レビューはせず、Draftなら`gh pr ready <N>`でreadyにする（ユーザーが見送った重い指摘が残っていても同じ）。対応報告のURLを伝える
