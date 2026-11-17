@@ -1,3 +1,6 @@
 .worktrees/
 node_modules/
 .claude/settings.local.json
+
+# claude plugin eval の実行結果
+plugins/*/evals/results/
