@@ -28,24 +28,6 @@ git status --porcelain
 
 ブランチ名か最新コミットのどちらかが一致しない場合、または`git status --porcelain`が何か出力した場合は、停止してユーザーに伝える — このあと指摘の正誤や「直っている」かを手元のコードで判定するので、レビューされたのと違うコードやpushしていないコミットを根拠にしないため。また、別のブランチに修正を積んだり、ユーザーの作業中の変更を修正のコミットに巻き込んだりするのを防ぐため。勝手にcheckoutもしない（作業ツリーに未コミットの変更があると巻き込むため）。
 
-**stackの下のPRが先に進んでいたら、rebaseする:** このPRがstackの途中にあり（baseブランチが、ほかの開いているPRのheadブランチである）、そのbaseブランチにこのPRが含まない新しいコミットがあれば、このPRのブランチをbaseブランチの上にrebaseしてから仕分ける。下のPRに`fix-review`が修正を積むと、stackの履歴が一直線でなくなり、rebaseするまでstackをマージできないため（出典: https://docs.github.com/en/pull-requests/reference/stacked-pull-requests ）。下のPRの`fix-review`は、Step 7で上のPRもrebaseするが、それが止まって人に任された場合に備えて、ここでも確かめる:
-
-```bash
-gh pr view <N> --json baseRefName
-gh pr list --head <baseRefName> --state open --json number
-git fetch origin <baseRefName>
-git merge-base --is-ancestor origin/<baseRefName> HEAD
-```
-
-2つ目のコマンドがPRを1件も返さなければ、stackの途中ではないので、rebaseしない（`main`などが進んだだけのPRは、ここでは扱わない）。4つ目のコマンドが成功すれば、baseブランチは先に進んでいないので、rebaseしない。どちらでもなければ、`gh stack`でrebaseしてpushする。`gh stack checkout`は、手元にstackの情報が無ければGitHubから取ってくる（あれば何もしない）。`--no-trunk`を付けて、trunkには触れない:
-
-```bash
-gh stack checkout <N>
-（stackの各ブランチをoriginに揃える）
-gh stack rebase --downstack --no-trunk
-gh stack push
-```
-
 **stackの各ブランチをoriginに揃える:** `--no-trunk`は、fetchも手元のブランチの更新もしない。手元のブランチが古いまま`gh stack push`すると、originにある新しいコミットを巻き戻してしまう。そこで、rebaseの前に、stackのブランチを1つずつoriginと比べる。対象は、`gh stack view --json`の`branches`のうち、`isMerged`が`false`で、今いるブランチより下のもの（`branches`は下から上の順に並ぶ。ここでのrebaseは`--downstack`で、上のブランチには触れないため、上のブランチは見ない。今いるブランチは、PRのheadと一致することを確かめ済み）:
 
 ```bash
