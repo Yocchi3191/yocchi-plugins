@@ -5,7 +5,7 @@ description: 大きすぎるPRを、GitHubのstacked PRに分割したいとき�
 
 # Split PR
 
-見るべき差分が目安を超えたPRを、stacked PRに分割する。分割するかどうかは、ユーザーが決める。元のPRをA、新しいPRをB・Cと呼び、A ← B ← C と積む（Aのbaseは変えない。Bのbase = Aのhead、Cのbase = Bのhead）。
+問題解決をさらに細かい問題解決に分けたいPR（見るべき差分が目安を超えたものなど）を、stacked PRに分割する。分割するかどうかは、ユーザーが決める。元のPRをA、新しいPRをB・Cと呼び、A ← B ← C と積む（Aのbaseは変えない。Bのbase = Aのhead、Cのbase = Bのhead）。
 
 **一番大事な規則: 分け方に設計判断が要るときは、分割を始める前に、必ずユーザーに聞く。** 失敗時の戻し方とstackの途中のPRの扱いは `references/recovery.md`、PR本文の書き方は `references/body.md` を読む。
 

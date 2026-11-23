@@ -81,4 +81,4 @@ git ls-files --error-unmatch -- ':(top)<adr-path>'
 
 Step 5のコミットやpushが失敗したら、ユーザーに伝えて停止する（手元とPRのheadがずれたままレビューを始めると、`review` が止まるため）。
 
-成功したら、**ユーザーに確認せず**、続けて `development:review` を呼ぶ。この引き継ぎは省かない。
+成功したら、**ユーザーに確認せず**、続けて `development:review` を作成したPRの番号で呼ぶ。この引き継ぎは省かない。
