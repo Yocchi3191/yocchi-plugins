@@ -15,7 +15,7 @@ query($owner:String!,$repo:String!,$number:Int!){
 }'
 ```
 
-- `comments`: PR全体へのコメント（`review-pr`の結果もここ）
+- `comments`: PR全体へのコメント（レビュー結果のコメントもここ）
 - `reviews`: 人が提出したレビューの本文
 - `reviewThreads`: 差分の行に付いたスレッド
 

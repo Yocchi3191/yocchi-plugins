@@ -1,11 +1,11 @@
 ---
 name: split-pr
-description: 大きすぎるPRを、GitHubのstacked PRに分割したいときに使う — 例:「PR #40を分割して」「split-pr 40」。review-prが付ける「PRを分割する」の指摘に対応するとき、fix-reviewからも呼ばれる。元のPRのコミットを、レビュー規約（review-rules.md）の上限に収まる区切りで分け、元のPRを一番下にしたstack（A ← B ← C）にする。元のブランチは履歴を書き換えてforce pushし、新しいPRはDraftで作ってレビューにはかけない。コミットの区切りで分けられなければ、分け方をユーザーに聞く。
+description: 大きすぎるPRを、GitHubのstacked PRに分割したいときに使う — 例:「PR #40を分割して」「split-pr 40」。レビューで付いた「PRを分割する」の指摘に対応するとき、fix-reviewからも呼ばれる。元のPRのコミットを、レビュー規約（review-rules.md）の目安に収まる区切りで分け、元のPRを一番下にしたstack（A ← B ← C）にする。元のブランチは履歴を書き換えてforce pushし、新しいPRはDraftで作ってレビューにはかけない。コミットの区切りで分けられなければ、分け方をユーザーに聞く。
 ---
 
 # Split PR
 
-見るべき差分が上限を超えたPRを、stacked PRに分割する。分割するかどうかは `review-pr` と `fix-review` が決める。元のPRをA、新しいPRをB・Cと呼び、A ← B ← C と積む（Aのbaseは変えない。Bのbase = Aのhead、Cのbase = Bのhead）。
+見るべき差分が上限を超えたPRを、stacked PRに分割する。分割するかどうかは `fix-review` が決める。元のPRをA、新しいPRをB・Cと呼び、A ← B ← C と積む（Aのbaseは変えない。Bのbase = Aのhead、Cのbase = Bのhead）。
 
 **一番大事な規則: 分け方に設計判断が要るときは、分割を始める前に、必ずユーザーに聞く。** 失敗時の戻し方とstackの途中のPRの扱いは `references/recovery.md`、PR本文の書き方は `references/body.md` を読む。
 
@@ -64,4 +64,4 @@ issueの参照（`Closes` はstackの一番上のPRにだけ）、対応するRE
 
 ## Step 8: 次に進む
 
-`fix-review` から呼ばれたなら、新しいPRの番号とURLを渡して戻る。直接起動なら、`development:review-pr` をAの番号で呼ぶ。新しいPRはレビューにかけず、Draftのまま置く。新しいPRの番号とURLを伝え、レビューは別に頼むよう添える。
+`fix-review` から呼ばれたなら、新しいPRの番号とURLを渡して戻る。直接起動なら、`development:review` を呼ぶ。新しいPRはレビューにかけず、Draftのまま置く。新しいPRの番号とURLを伝え、レビューは別に頼むよう添える。
