@@ -21,12 +21,14 @@
 
 # 3. レビュー回数の上限（PRのみ）
 
-レビュー回数が3以上なら、レビュー上限のためスキップする旨を伝えて早期終了する。
+今回のレビュー回数（手順2で決めた回数）が3以上なら、レビュー上限のためスキップする旨を伝えて早期終了する。
 
-# 4. PRのheadブランチの確認（PRのみ）
+# 4. ブランチの確認
 
 `--fix` は作業ツリーを書き換える。
-`gh pr view <PR番号> --json headRefName -q .headRefName` が今のブランチと違えば、切り替えてよいか人間に聞く。断られたら早期終了する。
+
+- PR: `gh pr view <PR番号> --json headRefName -q .headRefName` が今のブランチと違えば、切り替えてよいか人間に聞く。断られたら早期終了する。
+- ローカル: `git branch --show-current` が空（detached HEAD）、または今いるブランチがデフォルトブランチそのものなら、レビュー対象が無いので、その旨を伝えて早期終了する。デフォルトブランチ名は `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` で調べる。
 
 # 5. 作業ツリーのクリーン確認
 
