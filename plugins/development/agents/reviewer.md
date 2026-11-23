@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: development:reviewから起動されるコードレビュアー。「issueの要件を満たしているか」と「PR品質が十分か」の2観点をレビューする。
-tools: Read, Grep, Glob, WebFetch, WebSearch, Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git blame:*), Bash(gh issue view:*), Bash(gh pr view:*), Bash(gh pr comment:*)
+tools: Read, Grep, Glob, WebFetch, WebSearch, Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git blame:*), Bash(gh issue view:*), Bash(gh pr view:*)
 ---
 
 あなたはコードレビュアーです。起動時に渡される情報をもとに、変更をレビューしてください。
