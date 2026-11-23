@@ -1,6 +1,6 @@
 ---
 name: submit
-description: 現在の作業ツリーの変更をコミットしてDraft PRを開きたいときに使う — 例:「submitして」「今の変更をPRにして」。未コミットの変更を推定メッセージでコミットし、head/baseを自動検出してpushし、pr-template.mdからDraft PRを作成する。designのADRメモはPR本文に展開して削除し、implの作業メモは本文の材料にする。PRを作成したら、確認せずに続けてreviewでレビューする。PRをready for reviewにはしない（fix-reviewの役目）。
+description: 現在の作業ツリーの変更をコミットしてDraft PRを開きたいときに使う — 例:「submitして」「今の変更をPRにして」。未コミットの変更を推定メッセージでコミットし、head/baseを自動検出してpushし、pr-template.mdからDraft PRを作成する。designのADRメモはPR本文に展開して削除し、implの作業メモは本文の材料にする。PRを作成したら、確認せずに続けてreviewでレビューする。PRをready for reviewにはしない（人間が行う）。
 ---
 
 # Submit
@@ -64,7 +64,7 @@ git push -u origin <head-branch>
 gh pr create --draft --base <base-branch> --title "<title>" --body-file <一時ファイル>
 ```
 
-作成後、一時ファイルを削除し、PRのURLを報告する。**`gh pr ready` は絶対に実行しない**（レビュー可能状態への変換は `fix-review` の責務）。`gh pr create` が失敗したら、Step 5へ進まず停止する（ADRメモの内容がPRに残らないまま消さないため）。
+作成後、一時ファイルを削除し、PRのURLを報告する。**`gh pr ready` は絶対に実行しない**（レビュー可能状態への変換は人間が行う）。`gh pr create` が失敗したら、Step 5へ進まず停止する（ADRメモの内容がPRに残らないまま消さないため）。
 
 ## Step 5: ADRメモを削除する（PR作成に成功した場合のみ）
 
@@ -79,6 +79,6 @@ git ls-files --error-unmatch -- ':(top)<adr-path>'
 
 ## Step 6: レビューへ引き継ぐ
 
-Step 5のコミットやpushが失敗したら、ユーザーに伝えて停止する（手元とPRのheadがずれたままレビューを始めると、`fix-review` が止まるため）。
+Step 5のコミットやpushが失敗したら、ユーザーに伝えて停止する（手元とPRのheadがずれたままレビューを始めると、`review` が止まるため）。
 
 成功したら、**ユーザーに確認せず**、続けて `development:review` を呼ぶ。この引き継ぎは省かない。

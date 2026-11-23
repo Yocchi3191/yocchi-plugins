@@ -1,11 +1,11 @@
 ---
 name: feedback
-description: ユーザーがdevelopmentプラグイン自体（submit、review、fix-review、test-infra-setup、designなどのskillやスクリプト）について不満・戸惑い・機能要望を口にしたときに使う——自分自身のプロジェクトのコードについての話ではない場合に限る。自然な言い回しにも反応する。例:「developmentのreviewが使いにくい」「submitにこの機能が欲しい」「developmentのここが不便」。developmentへのフィードバックを起票するよう明示的に呼ばれた場合も使う。状況をヒアリングし、Yocchi3191/yocchi-pluginsの既存GitHub issueとの重複を確認した上で、ユーザーの明示的な承認を得てから新規issueを作成する（または既存issueにコメントする）——承認を得る前に起票することは決してない。
+description: ユーザーがdevelopmentプラグイン自体（submit、review、test-infra-setup、designなどのskillやスクリプト）について不満・戸惑い・機能要望を口にしたときに使う——自分自身のプロジェクトのコードについての話ではない場合に限る。自然な言い回しにも反応する。例:「developmentのreviewが使いにくい」「submitにこの機能が欲しい」「developmentのここが不便」。developmentへのフィードバックを起票するよう明示的に呼ばれた場合も使う。状況をヒアリングし、Yocchi3191/yocchi-pluginsの既存GitHub issueとの重複を確認した上で、ユーザーの明示的な承認を得てから新規issueを作成する（または既存issueにコメントする）——承認を得る前に起票することは決してない。
 ---
 
 # Feedback
 
-development プラグイン自体（`submit` / `review` / `fix-review` / `test-infra-setup` / `design` などのskillやスクリプト）への要望・クレームを受け付け、`Yocchi3191/yocchi-plugins` リポジトリのGitHub issueとして記録する。**扱うのは development というツール自体へのフィードバックだけ** — ユーザー自身のプロジェクトの仕様やバグは対象外なので、そちらの話であれば通常通り会話や別skillに任せる。
+development プラグイン自体（`submit` / `review` / `test-infra-setup` / `design` などのskillやスクリプト）への要望・クレームを受け付け、`Yocchi3191/yocchi-plugins` リポジトリのGitHub issueとして記録する。**扱うのは development というツール自体へのフィードバックだけ** — ユーザー自身のプロジェクトの仕様やバグは対象外なので、そちらの話であれば通常通り会話や別skillに任せる。
 
 ## Step 1: 種別と状況をヒアリング
 
