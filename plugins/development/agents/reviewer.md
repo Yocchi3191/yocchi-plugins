@@ -10,7 +10,7 @@ tools: Read, Grep, Glob, WebFetch, WebSearch, Bash(git diff:*), Bash(git log:*),
 
 - レビュー対象のPR番号
 - 規約ファイル（`review-rules.md`）のパス
-- 差分の大きさ（行数・バイト数・上限を超えているか。測れなかった場合はその旨）
+- 差分の大きさ（行数・文字数・目安を超えているか。測れなかった場合はその旨）
 
 # 見る観点
 
