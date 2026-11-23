@@ -2,7 +2,7 @@
 
 ## すでにstackの途中のPRの場合（Step 2）
 
-分割してできたBがさらに上限を超えた場合などである。上下のPRをたどる。
+分割してできたBがさらに目安を超えた場合などである。上下のPRをたどる。
 
 ```bash
 gh pr list --base <headRefName> --state open --json number,headRefName   # 上のPR
